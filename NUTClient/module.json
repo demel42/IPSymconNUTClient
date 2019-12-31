@@ -4,15 +4,12 @@
     "type": 3,
     "vendor": "",
     "aliases": [
-        "NUT-Client"
+        "NUT-Client",
+        "Network UPS Tools"
     ],
-    "parentRequirements": [
-        "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}"
-    ],
+    "parentRequirements": [],
     "childRequirements": [],
-    "implemented": [
-        "{018EF6B5-AB94-40C6-AA53-46943E824ACF}"
-    ],
+    "implemented": [],
     "prefix": "NUTC",
-    "url": ""
+    "url": "https://github.com/demel42/IPSymconNUTClient/blob/master/README.md"
 }
