@@ -1,0 +1,18 @@
+{
+    "id": "{D7648DB1-3D1D-F0A8-BA2D-01EA50AF6F4C}",
+    "name": "NUTClient",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "NUT-Client"
+    ],
+    "parentRequirements": [
+        "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{018EF6B5-AB94-40C6-AA53-46943E824ACF}"
+    ],
+    "prefix": "NUTC",
+    "url": ""
+}
