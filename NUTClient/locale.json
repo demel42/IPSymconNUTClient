@@ -1,8 +1,32 @@
 {
-    "translations": {
-        "de": {
-            "Translation 1": "Übersetzung 1",
-            "Translation 2": "Übersetzung 2"
-        }
-    }
+	"translations": {
+		"de": {
+			"Instance is disabled": "Instanz ist deaktiviert",
+			"Instance is inactive": "Instanz ist inaktiv",
+
+			"Basic configuration": "Basis-Konfiguration",
+			"Hostname": "Hostname",
+			"Port": "Port",
+			"UPS-Identification": "USV-Identifikation",
+
+			"Authentification (optional)": "Anmeldedaten (optional)",
+			"Username": "Benutzer",
+			"Password": "Passwort",
+
+			"Test access": "Zugang prüfen",
+
+			"access failed": "Zugang fehlgeschlagen",
+			"access succeeded": "Zugang erfolgreich",
+			"message": "Mitteilung",
+			"UPS found": "USV gefunden",
+
+			"Instance getting created": "Instanz wird erstellt",
+			"Instance is active": "Instanz ist aktiv",
+			"Instance is deleted": "Instanz wird gelöscht",
+			"Instance is inactive": "Instanz ist inaktiv",
+			"Instance is not created": "Instanz wurde nicht erzeugt",
+
+			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)"
+		}
+	}
 }
