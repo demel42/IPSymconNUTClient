@@ -13,12 +13,59 @@
 			"Username": "Benutzer",
 			"Password": "Passwort",
 
+			"Variables": "Variablen",
+			"Name": "Name",
+            "Description": "Beschreibung",
+            "use": "verwenden",
+
+			"Update data every X seconds": "Aktualisieren Daten alle X Sekunden",
+            "Seconds": "Sekunden",
+
 			"Test access": "Zugang prüfen",
+			"Update data": "Aktualisiere Daten",
 
 			"access failed": "Zugang fehlgeschlagen",
 			"access succeeded": "Zugang erfolgreich",
 			"message": "Mitteilung",
 			"UPS found": "USV gefunden",
+			"Warning: the specified UPS ID is unknown": "Achtung: die angegebenen USV-ID ist unbekannt",
+
+			"Status": "Status",
+			"Alarm": "Alarm",
+			"Manufacturer": "Hersteller",
+			"Model": "Modell",
+			"Serialnumber": "Seriennummer",
+			"Load on UPS": "Ladezustand der USV",
+			"Nominal value of real power": "Nennwert der Wirkleistung",
+			"Battery charge": "Batterieladung",
+			"Battery voltage": "Batteriespannung",
+			"Battery current": "Batteriestrom",
+			"Battery capacity": "Batteriekapazität",
+			"Battery temperature": "Batterietemperatur",
+			"Battery runtime": "Akkulaufzeit",
+			"Input voltage": "Eingangsspannung",
+			"Input current": "Eingangsstrom",
+			"Real power": "Wirkleistung",
+			"Input frequency": "Eingangsfrequenz",
+			"Output voltage": "Ausgangsspannung",
+			"Output current": "Ausgangsstrom",
+			"Output frequency": "Ausgangsfrequenz",
+
+			"on line": "Online",
+			"on battery": "Batteriebetrieb",
+			"low battery": "niedriger Batterieladung",
+			"high battery": "hohe Batterieladung",
+			"battery needs replacement": "Batterie muss ersetzt werden",
+			"battery is charging": "Batterie lädt",
+			"battery is discharging": "Batterie entlädt",
+			"bypass circuit activated": "Bypass aktiviert",
+			"UPS is calibrating": "USV wird kalibriert",
+			"UPS is offline": "USV ist inaktiv",
+			"UPS is overloaded": "USV ist überlastet",
+			"trimming incoming voltage": "Eingangsspannung wird begrenzt",
+			"boosting incoming voltage": "Eingangsspannung wird erhöhen",
+			"forced shutdown": "erzwungenes Herunterfahren",
+			"unknown state": "unbekannter Zustand",
 
 			"Instance getting created": "Instanz wird erstellt",
 			"Instance is active": "Instanz ist aktiv",
@@ -26,7 +73,8 @@
 			"Instance is inactive": "Instanz ist inaktiv",
 			"Instance is not created": "Instanz wurde nicht erzeugt",
 
-			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)"
+			"Instance is inactive (ups-id missing)": "Instanz ist inaktiv (USV-ID fehlt)",
+			"Instance is inactive (ups-id unknown)": "Instanz ist inaktiv (USV-ID ist unbekannt)"
 		}
 	}
 }

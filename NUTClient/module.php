@@ -4,6 +4,24 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
 
+if (!defined('NUTC_STATUSNONE')) {
+    define('NUTC_STATUS_OL', 0);
+    define('NUTC_STATUS_OB', 1);
+    define('NUTC_STATUS_LB', 2);
+    define('NUTC_STATUS_HB', 3);
+    define('NUTC_STATUS_RB', 4);
+    define('NUTC_STATUS_CHRG', 5);
+    define('NUTC_STATUS_DISCHRG', 6);
+    define('NUTC_STATUS_BYPASS', 7);
+    define('NUTC_STATUS_CAL', 8);
+    define('NUTC_STATUS_OFF', 9);
+    define('NUTC_STATUS_OVER', 10);
+    define('NUTC_STATUS_TRIM', 11);
+    define('NUTC_STATUS_BOOST', 12);
+    define('NUTC_STATUS_FSD', 13);
+    define('NUTC_STATUS_UNKNOWN', 14);
+}
+
 class NUTClient extends IPSModule
 {
     use NUTClientCommon;
@@ -21,6 +39,50 @@ class NUTClient extends IPSModule
         $this->RegisterPropertyString('password', '');
 
         $this->RegisterPropertyString('upsname', 'ups');
+
+        $this->RegisterPropertyInteger('update_interval', '30');
+
+        $this->RegisterPropertyString('use_fields', '[]');
+
+        $this->CreateVarProfile('NUTC.sec', VARIABLETYPE_INTEGER, ' s', 0, 0, 0, 0, 'Clock');
+        $this->CreateVarProfile('NUTC.Percent', VARIABLETYPE_FLOAT, ' %', 0, 0, 0, 0, '');
+
+        $associations = [];
+        $associations[] = ['Wert' => NUTC_STATUS_OL,      'Name' => $this->Translate('on line'), 'Farbe' => 0x008000];
+        $associations[] = ['Wert' => NUTC_STATUS_OB,      'Name' => $this->Translate('on battery'), 'Farbe' => 0xFFA500];
+        $associations[] = ['Wert' => NUTC_STATUS_LB,      'Name' => $this->Translate('low battery'), 'Farbe' => 0xEE0000];
+        $associations[] = ['Wert' => NUTC_STATUS_HB,      'Name' => $this->Translate('high battery'), 'Farbe' => -1];
+        $associations[] = ['Wert' => NUTC_STATUS_RB,      'Name' => $this->Translate('battery needs replacement'), 'Farbe' => 0xFFFF00];
+        $associations[] = ['Wert' => NUTC_STATUS_CHRG,    'Name' => $this->Translate('battery is charging'), 'Farbe' => -1];
+        $associations[] = ['Wert' => NUTC_STATUS_DISCHRG, 'Name' => $this->Translate('battery is discharging'), 'Farbe' => -1];
+        $associations[] = ['Wert' => NUTC_STATUS_BYPASS,  'Name' => $this->Translate('bypass circuit activated'), 'Farbe' => -1];
+        $associations[] = ['Wert' => NUTC_STATUS_CAL,     'Name' => $this->Translate('UPS is calibrating'), 'Farbe' => -1];
+        $associations[] = ['Wert' => NUTC_STATUS_OFF,     'Name' => $this->Translate('UPS is offline'), 'Farbe' => 0xFF00FF];
+        $associations[] = ['Wert' => NUTC_STATUS_OVER,    'Name' => $this->Translate('UPS is overloaded'), 'Farbe' => 0xFF00FF];
+        $associations[] = ['Wert' => NUTC_STATUS_TRIM,    'Name' => $this->Translate('trimming incoming voltage'), 'Farbe' => -1];
+        $associations[] = ['Wert' => NUTC_STATUS_BOOST,   'Name' => $this->Translate('boosting incoming voltage'), 'Farbe' => -1];
+        $associations[] = ['Wert' => NUTC_STATUS_FSD,     'Name' => $this->Translate('forced shutdown'), 'Farbe' => 0xFFA500];
+        $associations[] = ['Wert' => NUTC_STATUS_UNKNOWN, 'Name' => $this->Translate('unknown state'), 'Farbe' => -1];
+        $this->CreateVarProfile('NUTC.Status', VARIABLETYPE_INTEGER, '', 0, 0, 0, 1, '', $associations);
+
+        $this->CreateVarProfile('NUTC.Frequency', VARIABLETYPE_INTEGER, ' Hz', 0, 0, 0, 0, '');
+
+        $this->CreateVarProfile('NUTC.Temperatur', VARIABLETYPE_FLOAT, ' °C', 0, 0, 0, 1, 'Temperature');
+        $this->CreateVarProfile('NUTC.Voltage', VARIABLETYPE_FLOAT, ' V', 0, 0, 0, 1, '');
+        $this->CreateVarProfile('NUTC.Current', VARIABLETYPE_FLOAT, ' A', 0, 0, 0, 2, '');
+        $this->CreateVarProfile('NUTC.Capacity', VARIABLETYPE_FLOAT, ' Ah', 0, 0, 0, 2, '');
+        $this->CreateVarProfile('NUTC.Power', VARIABLETYPE_FLOAT, ' W', 0, 0, 0, 0, '');
+
+        $this->RegisterMessage(0, IPS_KERNELMESSAGE);
+    }
+
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    {
+        parent::MessageSink($TimeStamp, $SenderID, $Message, $Data);
+
+        if ($Message == IPS_KERNELMESSAGE && $Data[0] == KR_READY) {
+            $this->SetUpdateInterval();
+        }
     }
 
     public function ApplyChanges()
@@ -42,11 +104,91 @@ class NUTClient extends IPSModule
             return;
         }
 
+        $upsname = $this->ReadPropertyString('upsname');
+        $ups_list = $this->executeList('UPS', '');
+        $ups_found = false;
+        foreach ($ups_list as $ups) {
+            if ($ups['id'] == $upsname) {
+                $ups_found = true;
+            }
+        }
+        if ($ups_found == false) {
+            $this->SetStatus(IS_UPSIDUNKNOWN);
+            return false;
+        }
+
+        $vpos = 1;
+        $varList = [];
+
+        $identList = [];
+        $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
+        $fieldMap = $this->getFieldMap();
+        foreach ($fieldMap as $map) {
+            $ident = $this->GetArrayElem($map, 'ident', '');
+            $use = false;
+            foreach ($use_fields as $field) {
+                if ($ident == $this->GetArrayElem($field, 'ident', '')) {
+                    $use = (bool) $this->GetArrayElem($field, 'use', false);
+                    break;
+                }
+            }
+            if ($use) {
+                $identList[] = $ident;
+            }
+            $desc = $this->GetArrayElem($map, 'desc', '');
+            $vartype = $this->GetArrayElem($map, 'type', '');
+            $varprof = $this->GetArrayElem($map, 'prof', '');
+            $this->SendDebug(__FUNCTION__, 'register variable: ident=' . $ident . ', vartype=' . $vartype . ', varprof=' . $varprof . ', use=' . $this->bool2str($use), 0);
+            $this->MaintainVariable($ident, $this->Translate($desc), $vartype, $varprof, $vpos++, $use);
+            $varList[] = $ident;
+        }
+
+        $vpos = 100;
+
+        $this->MaintainVariable('LastUpdate', $this->Translate('Last update'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
+
+        $objList = [];
+        $this->findVariables($this->InstanceID, $objList);
+        foreach ($objList as $obj) {
+            $ident = $obj['ObjectIdent'];
+            if (!in_array($ident, $varList)) {
+                $this->SendDebug(__FUNCTION__, 'unregister variable: ident=' . $ident, 0);
+                $this->UnregisterVariable($ident);
+            }
+        }
+
         if (IPS_GetKernelRunlevel() == KR_READY) {
-            // $this->SetTimerInterval('UpdateData', 1000);
+            $this->SetUpdateInterval();
         }
 
         $this->SetStatus(IS_ACTIVE);
+    }
+
+    protected function SetUpdateInterval()
+    {
+        $sec = $this->ReadPropertyInteger('update_interval');
+        $msec = $sec > 0 ? $sec * 1000 : 0;
+        $this->SetTimerInterval('UpdateData', $msec);
+    }
+
+    private function findVariables($objID, &$objList)
+    {
+        $chldIDs = IPS_GetChildrenIDs($objID);
+        foreach ($chldIDs as $chldID) {
+            $obj = IPS_GetObject($chldID);
+            switch ($obj['ObjectType']) {
+                case OBJECTTYPE_VARIABLE:
+                    if (preg_match('#^[a-z_]+\.[a-z_]+.*$#', $obj['ObjectIdent'], $r)) {
+                        $objList[] = $obj;
+                    }
+                    break;
+                case OBJECTTYPE_CATEGORY:
+                    $this->findVariables($chldID, $objList);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public function GetConfigurationForm()
@@ -117,6 +259,49 @@ class NUTClient extends IPSModule
             'items'   => $items
         ];
 
+        $values = [];
+        $fieldMap = $this->getFieldMap();
+        foreach ($fieldMap as $map) {
+            $ident = $this->GetArrayElem($map, 'ident', '');
+            $desc = $this->GetArrayElem($map, 'desc', '');
+            $values[] = ['ident' => $ident, 'desc' => $this->Translate($desc)];
+        }
+
+        $columns = [];
+        $columns[] = [
+            'caption' => 'Name',
+            'name'    => 'ident',
+            'width'   => '200px',
+            'save'    => true
+        ];
+        $columns[] = [
+            'caption' => 'Description',
+            'name'    => 'desc',
+            'width'   => 'auto'
+        ];
+        $columns[] = [
+            'caption' => 'use',
+            'name'    => 'use',
+            'width'   => '100px',
+            'edit'    => [
+                'type' => 'CheckBox'
+            ]
+        ];
+
+        $items = [];
+        $items[] = [
+            'type'     => 'List',
+            'name'     => 'use_fields',
+            'caption'  => 'available variables',
+            'rowCount' => count($values),
+            'add'      => false,
+            'delete'   => false,
+            'columns'  => $columns,
+            'values'   => $values
+        ];
+
+        $formElements[] = ['type' => 'ExpansionPanel', 'items' => $items, 'caption' => 'Variables'];
+
         return $formElements;
     }
 
@@ -158,18 +343,107 @@ class NUTClient extends IPSModule
             $txt .= $line . PHP_EOL;
             $txt .= PHP_EOL;
 
-            $a_ups = $this->executeList('UPS', '');
-            $n_ups = count($a_ups);
+            $upsname = $this->ReadPropertyString('upsname');
+            $ups_list = $this->executeList('UPS', '');
+            $n_ups = count($ups_list);
+            $ups_found = false;
             if ($n_ups > 0) {
                 $txt .= $n_ups . ' ' . $this->Translate('UPS found') . PHP_EOL;
-                foreach ($a_ups as $ups) {
+                foreach ($ups_list as $ups) {
                     $this->SendDebug(__FUNCTION__, 'ups=' . print_r($ups, true), 0);
                     $txt .= ' - ' . $ups['id'] . PHP_EOL;
+                    if ($ups['id'] == $upsname) {
+                        $ups_found = true;
+                    }
                 }
+            }
+            if ($ups_found == false) {
+                $txt .= PHP_EOL . $this->Translate('Warning: the specified UPS ID is unknown') . PHP_EOL;
+                $this->SetStatus(IS_UPSIDUNKNOWN);
             }
         }
 
         echo $txt;
+    }
+
+    private function UpdateData()
+    {
+        $this->SendDebug(__FUNCTION__, 'data=' . print_r($jdata, true), 0);
+
+        $fieldMap = $this->getFieldMap();
+        $this->SendDebug(__FUNCTION__, 'fieldMap="' . print_r($fieldMap, true) . '"', 0);
+        $identV = [];
+        foreach ($fieldMap as $map) {
+            $identV[] = $this->GetArrayElem($map, 'ident', '');
+        }
+        $identS = implode(',', $identV);
+        $this->SendDebug(__FUNCTION__, 'known idents=' . $identS, 0);
+
+        $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
+        $use_fieldsV = [];
+        foreach ($use_fields as $field) {
+            if ((bool) $this->GetArrayElem($field, 'use', false)) {
+                $use_fieldsV[] = $this->GetArrayElem($field, 'ident', '');
+            }
+        }
+        $use_fieldsS = implode(',', $use_fieldsV);
+        $this->SendDebug(__FUNCTION__, 'use fields=' . $use_fieldsS, 0);
+
+        $vars = $this->GetArrayElem($jdata, 'vars', '');
+        foreach ($vars as $var) {
+            $ident = $this->GetArrayElem($var, 'homematic_name', '');
+            if (preg_match('#^[^_]+_(.+)$#', $ident, $r)) {
+                $ident = $r[1];
+            }
+            $value = $this->GetArrayElem($var, 'value', '');
+
+            $found = false;
+
+            $vartype = VARIABLETYPE_STRING;
+            $varprof = '';
+            foreach ($fieldMap as $map) {
+                if ($ident == $this->GetArrayElem($map, 'ident', '')) {
+                    $found = true;
+                    $vartype = $this->GetArrayElem($map, 'type', '');
+                    $varprof = $this->GetArrayElem($map, 'prof', '');
+                    break;
+                }
+            }
+
+            if (!$found) {
+                $this->SendDebug(__FUNCTION__, 'unknown ident "' . $ident . '", value=' . $value, 0);
+                $this->LogMessage(__FUNCTION__ . ': unknown ident ' . $ident . ', value=' . $value, KL_NOTIFY);
+                continue;
+            }
+
+            foreach ($use_fields as $field) {
+                if ($ident == $this->GetArrayElem($field, 'ident', '')) {
+                    $use = (bool) $this->GetArrayElem($field, 'use', false);
+                    if (!$use) {
+                        $this->SendDebug(__FUNCTION__, 'ignore ident "' . $ident . '", value=' . $value, 0);
+                        continue;
+                    }
+
+                    $this->SendDebug(__FUNCTION__, 'use ident "' . $ident . '", value=' . $value, 0);
+
+                    if (in_array($ident, ['luftdrucktrend', 'iaq'])) {
+                        $value = str_replace('_', ' ', $value);
+                    }
+
+                    switch ($vartype) {
+                        case VARIABLETYPE_INTEGER:
+                            $this->SetValue($ident, intval($value));
+                            break;
+                        default:
+                            $this->SetValue($ident, $value);
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
+
+        $this->SetValue('LastUpdate', time());
     }
 
     private function doCommunication($fp, $cmd, $args, &$lines)
@@ -549,5 +823,159 @@ class NUTClient extends IPSModule
             return false;
         }
         return true;
+    }
+
+    private function mapStatus($txt)
+    {
+        $txt2val = [
+            'OL'      => NUTC_STATUS_OL,
+            'OB'      => NUTC_STATUS_OB,
+            'LB'      => NUTC_STATUS_LB,
+            'HB'      => NUTC_STATUS_HB,
+            'RB'      => NUTC_STATUS_RB,
+            'CHRG'    => NUTC_STATUS_CHRG,
+            'DISCHRG' => NUTC_STATUS_DISCHRG,
+            'BYPASS'  => NUTC_STATUS_BYPASS,
+            'CAL'     => NUTC_STATUS_CAL,
+            'OFF'     => NUTC_STATUS_OFF,
+            'OVER'    => NUTC_STATUS_OVER,
+            'TRIM'    => NUTC_STATUS_TRIM,
+            'BOOST'   => NUTC_STATUS_BOOST,
+            'FSD'     => NUTC_STATUS_FSD,
+        ];
+
+        if (isset($txt2val[$txt])) {
+            $val = $txt2val[$txt];
+        } else {
+            $val = NUTC_STATUS_UNKNOWN;
+            $this->LogMessage('unknown ups.status ' . $txt, KL_NOTIFY);
+        }
+    }
+
+    private function getFieldMap()
+    {
+        $map = [
+            [
+                'ident'  => 'ups.status',
+                'desc'   => 'Status',
+                'type'   => VARIABLETYPE_INTEGER,
+                'prof'   => 'NUTC.Status',
+            ],
+            [
+                'ident'  => 'ups.alarm',
+                'desc'   => 'Alarm',
+                'type'   => VARIABLETYPE_STRING,
+            ],
+            [
+                'ident'  => 'ups.manufacturer',
+                'desc'   => 'Manufacturer',
+                'type'   => VARIABLETYPE_STRING,
+            ],
+            [
+                'ident'  => 'ups.model',
+                'desc'   => 'Model',
+                'type'   => VARIABLETYPE_STRING,
+            ],
+            [
+                'ident'  => 'ups.serial',
+                'desc'   => 'Serialnumber',
+                'type'   => VARIABLETYPE_STRING,
+            ],
+            [
+                'ident'  => 'ups.load',
+                'desc'   => 'Load on UPS',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Percent',
+            ],
+            [
+                'ident'  => 'ups.realpower.nominal',
+                'desc'   => 'Nominal value of real power',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Power',
+            ],
+
+            [
+                'ident'  => 'battery.charge',
+                'desc'   => 'Battery charge',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Percent',
+            ],
+            [
+                'ident'  => 'battery.voltage',
+                'desc'   => 'Battery voltage',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Voltage',
+            ],
+            [
+                'ident'  => 'battery.current',
+                'desc'   => 'Battery current',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Current',
+            ],
+            [
+                'ident'  => 'battery.capacity',
+                'desc'   => 'Battery capacity',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Capacity',
+            ],
+            [
+                'ident'  => 'battery.temperature',
+                'desc'   => 'Battery temperature',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Temperature',
+            ],
+            [
+                'ident'  => 'battery.runtime',
+                'desc'   => 'Battery runtime',
+                'type'   => VARIABLETYPE_INTEGER,
+                'prof'   => 'NUTC.Sec',
+            ],
+
+            [
+                'ident'  => 'input.voltage',
+                'desc'   => 'Input voltage',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Voltage',
+            ],
+            [
+                'ident'  => 'input.current',
+                'desc'   => 'Input current',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Current',
+            ],
+            [
+                'ident'  => 'input.realpower',
+                'desc'   => 'Real power',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Power',
+            ],
+            [
+                'ident'  => 'input.frequency',
+                'desc'   => 'Input frequency',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Frequency',
+            ],
+
+            [
+                'ident'  => 'output.voltage',
+                'desc'   => 'Output voltage',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Voltage',
+            ],
+            [
+                'ident'  => 'output.current',
+                'desc'   => 'Output current',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Current',
+            ],
+            [
+                'ident'  => 'output.frequency',
+                'desc'   => 'Output frequency',
+                'type'   => VARIABLETYPE_FLOAT,
+                'prof'   => 'NUTC.Frequency',
+            ],
+        ];
+
+        return $map;
     }
 }
