@@ -13,6 +13,7 @@
 			"Username": "Benutzer",
 			"Password": "Passwort",
 
+			"available datapoints": "verfügbare Datenpunkte",
 			"Variables": "Variablen",
 			"Name": "Name",
             "Description": "Beschreibung",
@@ -20,6 +21,7 @@
 
 			"Update data every X seconds": "Aktualisieren Daten alle X Sekunden",
             "Seconds": "Sekunden",
+			"Interval": "Intervall",
 
 			"Test access": "Zugang prüfen",
 			"Update data": "Aktualisiere Daten",
@@ -29,6 +31,7 @@
 			"message": "Mitteilung",
 			"UPS found": "USV gefunden",
 			"Warning: the specified UPS ID is unknown": "Achtung: die angegebenen USV-ID ist unbekannt",
+			"datapoints not found in data": "nicht in den Daten enthaltenen Datenpunkte",
 
 			"Status": "Status",
 			"Alarm": "Alarm",
@@ -50,6 +53,7 @@
 			"Output voltage": "Ausgangsspannung",
 			"Output current": "Ausgangsstrom",
 			"Output frequency": "Ausgangsfrequenz",
+			"Last update": "letzte Aktualisierung",
 
 			"on line": "Online",
 			"on battery": "Batteriebetrieb",

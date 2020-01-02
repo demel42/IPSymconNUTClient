@@ -42,6 +42,10 @@ class NUTClient extends IPSModule
 
         $this->RegisterPropertyInteger('update_interval', '30');
 
+        /*
+        $this->RegisterPropertyInteger('nominal_realpower', '0');
+         */
+
         $this->RegisterPropertyString('use_fields', '[]');
 
         $this->CreateVarProfile('NUTC.sec', VARIABLETYPE_INTEGER, ' s', 0, 0, 0, 0, 'Clock');
@@ -65,14 +69,16 @@ class NUTClient extends IPSModule
         $associations[] = ['Wert' => NUTC_STATUS_UNKNOWN, 'Name' => $this->Translate('unknown state'), 'Farbe' => -1];
         $this->CreateVarProfile('NUTC.Status', VARIABLETYPE_INTEGER, '', 0, 0, 0, 1, '', $associations);
 
+        $this->CreateVarProfile('NUTC.sec', VARIABLETYPE_INTEGER, ' s', 0, 0, 0, 0, 'Clock');
         $this->CreateVarProfile('NUTC.Frequency', VARIABLETYPE_INTEGER, ' Hz', 0, 0, 0, 0, '');
 
-        $this->CreateVarProfile('NUTC.Temperatur', VARIABLETYPE_FLOAT, ' °C', 0, 0, 0, 1, 'Temperature');
+        $this->CreateVarProfile('NUTC.Temperature', VARIABLETYPE_FLOAT, ' °C', 0, 0, 0, 1, 'Temperature');
         $this->CreateVarProfile('NUTC.Voltage', VARIABLETYPE_FLOAT, ' V', 0, 0, 0, 1, '');
-        $this->CreateVarProfile('NUTC.Current', VARIABLETYPE_FLOAT, ' A', 0, 0, 0, 2, '');
-        $this->CreateVarProfile('NUTC.Capacity', VARIABLETYPE_FLOAT, ' Ah', 0, 0, 0, 2, '');
+        $this->CreateVarProfile('NUTC.Current', VARIABLETYPE_FLOAT, ' A', 0, 0, 0, 0, '');
+        $this->CreateVarProfile('NUTC.Capacity', VARIABLETYPE_FLOAT, ' Ah', 0, 0, 0, 1, '');
         $this->CreateVarProfile('NUTC.Power', VARIABLETYPE_FLOAT, ' W', 0, 0, 0, 0, '');
 
+        $this->RegisterTimer('UpdateData', 0, 'NUTC_UpdateData(' . $this->InstanceID . ');');
         $this->RegisterMessage(0, IPS_KERNELMESSAGE);
     }
 
@@ -135,11 +141,15 @@ class NUTClient extends IPSModule
             if ($use) {
                 $identList[] = $ident;
             }
+            $ident = str_replace('.', '_', $ident);
             $desc = $this->GetArrayElem($map, 'desc', '');
             $vartype = $this->GetArrayElem($map, 'type', '');
             $varprof = $this->GetArrayElem($map, 'prof', '');
             $this->SendDebug(__FUNCTION__, 'register variable: ident=' . $ident . ', vartype=' . $vartype . ', varprof=' . $varprof . ', use=' . $this->bool2str($use), 0);
-            $this->MaintainVariable($ident, $this->Translate($desc), $vartype, $varprof, $vpos++, $use);
+            $r = $this->MaintainVariable($ident, $this->Translate($desc), $vartype, $varprof, $vpos++, $use);
+            if ($r == false) {
+                $this->SendDebug(__FUNCTION__, 'failed to register variable', 0);
+            }
             $varList[] = $ident;
         }
 
@@ -228,6 +238,7 @@ class NUTClient extends IPSModule
             'name'    => 'port',
             'caption' => 'Port'
         ];
+
         $items[] = [
             'type'    => 'Label',
         ];
@@ -236,10 +247,25 @@ class NUTClient extends IPSModule
             'name'    => 'upsname',
             'caption' => 'UPS-Identification'
         ];
+
+        $items[] = [
+            'type'    => 'Label',
+        ];
+        $items[] = [
+            'type'    => 'Label',
+            'caption' => 'Update data every X seconds'
+        ];
+        $items[] = [
+            'type'    => 'NumberSpinner',
+            'name'    => 'update_interval',
+            'caption' => 'Interval',
+            'suffix'  => 'Seconds'
+        ];
+
         $formElements[] = [
-            'type'    => 'ExpansionPanel',
-            'caption' => 'Basic configuration',
-            'items'   => $items
+            'type'      => 'ExpansionPanel',
+            'caption'   => 'Basic configuration',
+            'items'     => $items
         ];
 
         $items = [];
@@ -292,13 +318,26 @@ class NUTClient extends IPSModule
         $items[] = [
             'type'     => 'List',
             'name'     => 'use_fields',
-            'caption'  => 'available variables',
+            'caption'  => 'available datapoints',
             'rowCount' => count($values),
             'add'      => false,
             'delete'   => false,
             'columns'  => $columns,
             'values'   => $values
         ];
+
+        $items[] = [
+            'type'    => 'Label',
+            'caption' => 'seconds'
+        ];
+        /*
+        $items[] = [
+            'type'    => 'NumberSpinner',
+            'name'    => 'nominal_realpower',
+            'caption' => 'Nominal value of real power',
+            'suffix'  => 'W'
+        ];
+         */
 
         $formElements[] = ['type' => 'ExpansionPanel', 'items' => $items, 'caption' => 'Variables'];
 
@@ -309,10 +348,20 @@ class NUTClient extends IPSModule
     {
         $formActions = [];
 
-        $formActions[] = [
+        $items = [];
+        $items[] = [
             'type'    => 'Button',
             'caption' => 'Test access',
             'onClick' => 'NUTC_TestAccess($id);'
+        ];
+        $items[] = [
+            'type'    => 'Button',
+            'caption' => 'Update data',
+            'onClick' => 'NUTC_UpdateData($id);'
+        ];
+        $formActions[] = [
+            'type' => 'RowLayout',
+            'items'=> $items,
         ];
 
         return $formActions;
@@ -361,14 +410,40 @@ class NUTClient extends IPSModule
                 $txt .= PHP_EOL . $this->Translate('Warning: the specified UPS ID is unknown') . PHP_EOL;
                 $this->SetStatus(IS_UPSIDUNKNOWN);
             }
+
+            $b = false;
+            $vars = $this->executeList('VAR', '');
+            $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
+            foreach ($use_fields as $field) {
+                $use = (bool) $this->GetArrayElem($field, 'use', false);
+                if (!$use) {
+                    continue;
+                }
+                $ident = $this->GetArrayElem($field, 'ident', '');
+                $found = false;
+                foreach ($vars as $var) {
+                    if ($ident == $var['varname']) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if ($found == false) {
+                    if ($b == false) {
+                        $txt .= PHP_EOL . $this->Translate('datapoints not found in data') . PHP_EOL;
+                        $b = true;
+                    }
+                    $txt .= ' - ' . $ident . PHP_EOL;
+                }
+            }
         }
 
         echo $txt;
     }
 
-    private function UpdateData()
+    public function UpdateData()
     {
-        $this->SendDebug(__FUNCTION__, 'data=' . print_r($jdata, true), 0);
+        $vars = $this->executeList('VAR', '');
+        $this->SendDebug(__FUNCTION__, 'data=' . print_r($vars, true), 0);
 
         $fieldMap = $this->getFieldMap();
         $this->SendDebug(__FUNCTION__, 'fieldMap="' . print_r($fieldMap, true) . '"', 0);
@@ -389,31 +464,18 @@ class NUTClient extends IPSModule
         $use_fieldsS = implode(',', $use_fieldsV);
         $this->SendDebug(__FUNCTION__, 'use fields=' . $use_fieldsS, 0);
 
-        $vars = $this->GetArrayElem($jdata, 'vars', '');
         foreach ($vars as $var) {
-            $ident = $this->GetArrayElem($var, 'homematic_name', '');
-            if (preg_match('#^[^_]+_(.+)$#', $ident, $r)) {
-                $ident = $r[1];
-            }
-            $value = $this->GetArrayElem($var, 'value', '');
-
-            $found = false;
+            $ident = $var['varname'];
+            $value = $var['val'];
 
             $vartype = VARIABLETYPE_STRING;
             $varprof = '';
             foreach ($fieldMap as $map) {
                 if ($ident == $this->GetArrayElem($map, 'ident', '')) {
-                    $found = true;
                     $vartype = $this->GetArrayElem($map, 'type', '');
                     $varprof = $this->GetArrayElem($map, 'prof', '');
                     break;
                 }
-            }
-
-            if (!$found) {
-                $this->SendDebug(__FUNCTION__, 'unknown ident "' . $ident . '", value=' . $value, 0);
-                $this->LogMessage(__FUNCTION__ . ': unknown ident ' . $ident . ', value=' . $value, KL_NOTIFY);
-                continue;
             }
 
             foreach ($use_fields as $field) {
@@ -424,15 +486,15 @@ class NUTClient extends IPSModule
                         continue;
                     }
 
+                    $ident = str_replace('.', '_', $ident);
                     $this->SendDebug(__FUNCTION__, 'use ident "' . $ident . '", value=' . $value, 0);
-
-                    if (in_array($ident, ['luftdrucktrend', 'iaq'])) {
-                        $value = str_replace('_', ' ', $value);
-                    }
 
                     switch ($vartype) {
                         case VARIABLETYPE_INTEGER:
                             $this->SetValue($ident, intval($value));
+                            break;
+                        case VARIABLETYPE_FLOAT:
+                            $this->SetValue($ident, floatval($value));
                             break;
                         default:
                             $this->SetValue($ident, $value);
@@ -440,6 +502,24 @@ class NUTClient extends IPSModule
                     }
                     break;
                 }
+            }
+        }
+
+        foreach ($use_fields as $field) {
+            $use = (bool) $this->GetArrayElem($field, 'use', false);
+            if (!$use) {
+                continue;
+            }
+            $ident = $this->GetArrayElem($field, 'ident', '');
+            $found = false;
+            foreach ($vars as $var) {
+                if ($ident == $var['varname']) {
+                    $found = true;
+                    break;
+                }
+            }
+            if ($found == false) {
+                $this->SendDebug(__FUNCTION__, 'configured ident "' . $ident . '" not found in receviced data', 0);
             }
         }
 
@@ -563,9 +643,11 @@ class NUTClient extends IPSModule
         }
 
         $this->SendDebug(__FUNCTION__, 'received ' . count($lines) . ' lines', 0);
+        /*
         foreach ($lines as $no => $line) {
             $this->SendDebug(__FUNCTION__, 'line ' . $no . ': ' . $line, 0);
         }
+         */
         return $lines;
     }
 
@@ -620,7 +702,6 @@ class NUTClient extends IPSModule
         }
         $arr = [];
         foreach ($lines as $line) {
-            $this->SendDebug(__FUNCTION__, 'line=' . $line, 0);
             if (preg_match('/^BEGIN /', $line)) {
                 continue;
             }
@@ -636,7 +717,7 @@ class NUTClient extends IPSModule
                 case 'VAR':
                 case 'RW':
                     if (preg_match('/^[^ ]* ([^ ]*) ([^ ]*) "([^"]*)"$/', $line, $r)) {
-                        $arr[] = ['var' => $r[2], 'val' => rtrim($r[3])];
+                        $arr[] = ['varname' => $r[2], 'val' => rtrim($r[3])];
                     }
                     break;
                 case 'CMD':
@@ -651,12 +732,12 @@ class NUTClient extends IPSModule
                     break;
                 case 'RANGE':
                     if (preg_match('/^[^ ]* ([^ ]*) ([^ ]*) "([^"]*)" "([^"]*)"$/', $line, $r)) {
-                        $arr[] = ['var' => $r[2], 'min' => rtrim($r[3]), 'max' => rtrim($r[4])];
+                        $arr[] = ['varname' => $r[2], 'min' => rtrim($r[3]), 'max' => rtrim($r[4])];
                     }
                     break;
                 case 'ENUM':
                     if (preg_match('/^[^ ]* ([^ ]*) ([^ ]*) "([^"]*)"$/', $line, $r)) {
-                        $arr[] = ['var' => $r[2], 'val' => rtrim($r[3])];
+                        $arr[] = ['varname' => $r[2], 'val' => rtrim($r[3])];
                     }
                     break;
                 default:
@@ -704,17 +785,17 @@ class NUTClient extends IPSModule
         switch ($subcmd) {
             case 'VAR':
                 if (preg_match('/^[^ ]* ([^ ]*) ([^ ]*) "([^"]*)"$/', $line, $r)) {
-                    $elem = ['var' => $r[2], 'val' => rtrim($r[3])];
+                    $elem = ['varname' => $r[2], 'val' => rtrim($r[3])];
                 }
                 break;
             case 'TYPE':
                 if (preg_match('/^[^ ]* ([^ ]*) ([^ ]*) (.*)$/', $line, $r)) {
-                    $elem = ['var' => $r[2], 'type' => $r[3]];
+                    $elem = ['varname' => $r[2], 'type' => $r[3]];
                 }
                 break;
             case 'DESC':
                 if (preg_match('/^[^ ]* ([^ ]*) ([^ ]*) "([^"]*)"$/', $line, $r)) {
-                    $elem = ['var' => $r[2], 'desc' => rtrim($r[3])];
+                    $elem = ['varname' => $r[2], 'desc' => rtrim($r[3])];
                 }
                 break;
             case 'UPSDESC':
@@ -928,7 +1009,7 @@ class NUTClient extends IPSModule
                 'ident'  => 'battery.runtime',
                 'desc'   => 'Battery runtime',
                 'type'   => VARIABLETYPE_INTEGER,
-                'prof'   => 'NUTC.Sec',
+                'prof'   => 'NUTC.sec',
             ],
 
             [
@@ -952,7 +1033,7 @@ class NUTClient extends IPSModule
             [
                 'ident'  => 'input.frequency',
                 'desc'   => 'Input frequency',
-                'type'   => VARIABLETYPE_FLOAT,
+                'type'   => VARIABLETYPE_INTEGER,
                 'prof'   => 'NUTC.Frequency',
             ],
 
@@ -971,7 +1052,7 @@ class NUTClient extends IPSModule
             [
                 'ident'  => 'output.frequency',
                 'desc'   => 'Output frequency',
-                'type'   => VARIABLETYPE_FLOAT,
+                'type'   => VARIABLETYPE_INTEGER,
                 'prof'   => 'NUTC.Frequency',
             ],
         ];
