@@ -1,10 +1,9 @@
 {
     "id": "{D7648DB1-3D1D-F0A8-BA2D-01EA50AF6F4C}",
-    "name": "NUTClient",
+    "name": "NUT Client",
     "type": 3,
     "vendor": "",
     "aliases": [
-        "NUT-Client",
         "Network UPS Tools"
     ],
     "parentRequirements": [],

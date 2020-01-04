@@ -42,10 +42,6 @@ class NUTClient extends IPSModule
 
         $this->RegisterPropertyInteger('update_interval', '30');
 
-        /*
-        $this->RegisterPropertyInteger('nominal_realpower', '0');
-         */
-
         $this->RegisterPropertyString('use_fields', '[]');
 
         $this->CreateVarProfile('NUTC.sec', VARIABLETYPE_INTEGER, ' s', 0, 0, 0, 0, 'Clock');
@@ -327,17 +323,10 @@ class NUTClient extends IPSModule
         ];
 
         $items[] = [
-            'type'    => 'Label',
-            'caption' => 'seconds'
+            'type'    => 'Button',
+            'label'   => 'Description of the variables',
+            'onClick' => 'echo \'https://networkupstools.org/docs/user-manual.chunked/apcs01.html#_examples\';'
         ];
-        /*
-        $items[] = [
-            'type'    => 'NumberSpinner',
-            'name'    => 'nominal_realpower',
-            'caption' => 'Nominal value of real power',
-            'suffix'  => 'W'
-        ];
-         */
 
         $formElements[] = ['type' => 'ExpansionPanel', 'items' => $items, 'caption' => 'Variables'];
 
@@ -524,6 +513,20 @@ class NUTClient extends IPSModule
         }
 
         $this->SetValue('LastUpdate', time());
+
+        $model = '';
+        $serial = '';
+        foreach ($vars as $var) {
+            if ($var['varname'] == 'ups.model') {
+                $model = $var['val'];
+            }
+            if ($var['varname'] == 'ups.serial') {
+                $serial = $var['val'];
+            }
+        }
+
+        $info = $model . ' (#' . $serial . ')';
+        $this->SetSummary($info);
     }
 
     private function doCommunication($fp, $cmd, $args, &$lines)
@@ -964,7 +967,7 @@ class NUTClient extends IPSModule
             ],
             [
                 'ident'  => 'ups.load',
-                'desc'   => 'Load on UPS',
+                'desc'   => 'Load',
                 'type'   => VARIABLETYPE_FLOAT,
                 'prof'   => 'NUTC.Percent',
             ],
@@ -1026,7 +1029,7 @@ class NUTClient extends IPSModule
             ],
             [
                 'ident'  => 'input.realpower',
-                'desc'   => 'Real power',
+                'desc'   => 'Input real power',
                 'type'   => VARIABLETYPE_FLOAT,
                 'prof'   => 'NUTC.Power',
             ],
