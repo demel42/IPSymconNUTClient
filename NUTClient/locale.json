@@ -13,17 +13,21 @@
 			"Username": "Benutzer",
 			"Password": "Passwort",
 
-			"available datapoints": "verfügbare Datenpunkte",
 			"Variables": "Variablen",
-			"Name": "Name",
-            "Description": "Beschreibung",
-            "use": "verwenden",
-			"Description of the variables": "Beschreibung der Variablen",
+			"Predefined datapoints": "vordefinierte Datenpunkte",
+			"Additional datapoints": "zusätzliche Datenpunkte",
+			"Datapoint": "Datenpunkt",
+			"Description": "Beschreibung",
+			"Use": "verwenden",
+			"Variable type": "Variablentyp",
+			"convert values": "Werte konvertieren",
 
 			"Update data every X seconds": "Aktualisieren Daten alle X Sekunden",
-            "Seconds": "Sekunden",
+			"Seconds": "Sekunden",
 			"Interval": "Intervall",
 
+			"Show variables": "Anzeige der Variablen",
+			"Description of the variables": "Beschreibung der Variablen",
 			"Test access": "Zugang prüfen",
 			"Update data": "Aktualisiere Daten",
 
@@ -35,6 +39,7 @@
 			"datapoints not found in data": "nicht in den Daten enthaltenen Datenpunkte",
 
 			"Status": "Status",
+			"Additional status": "Statuszusatz",
 			"Alarm": "Alarm",
 			"Manufacturer": "Hersteller",
 			"Model": "Modell",

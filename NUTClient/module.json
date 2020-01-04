@@ -4,7 +4,8 @@
     "type": 3,
     "vendor": "",
     "aliases": [
-        "Network UPS Tools"
+        "Network UPS Tools",
+		"NUT-Client"
     ],
     "parentRequirements": [],
     "childRequirements": [],

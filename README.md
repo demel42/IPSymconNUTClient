@@ -1,7 +1,7 @@
 # IPSymconNUT
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.3+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-0.0-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.0-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -19,12 +19,12 @@
 
 ## 1. Funktionsumfang
 
-Abfrage der Daten via Networt-UPS-Tool
+Abfrage der Daten einer USV via Network-UPS-Tool (**NUT**)
 
 ## 2. Voraussetzungen
 
  - IP-Symcon ab Version 5.3
- - 
+ - eine USV mit eingerichtetem NUT-Server, z.B. eine an einer Synology Diskstation angeschlossene USV
 
 ## 3. Installation
 
@@ -36,7 +36,7 @@ Anschließend oben rechts auf das Symbol für den Modulstore (IP-Symcon > 5.1) k
 
 ![Store](docs/de/img/store_icon.png?raw=true "open store")
 
-Im Suchfeld nun _NUT-WZ_ eingeben, das Modul auswählen und auf _Installieren_ drücken.
+Im Suchfeld nun _NUT-Client eingeben, das Modul auswählen und auf _Installieren_ drücken.
 
 #### Alternatives Installieren über Modules Instanz (IP-Symcon < 5.1)
 
@@ -64,14 +64,19 @@ Anschließend erscheint ein Eintrag für das Modul in der Liste der Instanz _Mod
 
 ### b. Einrichtung des Geräte-Moduls
 
-In IP-Symcon nun unterhalb des Wurzelverzeichnisses die Funktion _Instanz hinzufügen_ (_CTRL+1_) auswählen, als Hersteller _XXXXXXXXX_ und als Gerät _NUT_ auswählen.
-Es wird automatisch eine I/O-Instanz vom Type Client-Socket angelegt und das Konfigurationsformular dieser Instanz geöffnet.
+In IP-Symcon nun unterhalb des Wurzelverzeichnisses die Funktion _Instanz hinzufügen_ (_CTRL+1_) auswählen, als Hersteller _- kein Hersteller -_ und als Gerät _NUT-Client_ auswählen.
 
-Hier die Portnummer eintragen, an die der NUT Daten schicken soll und die Instanz aktiv schalten.
+In der Konfigurationsseite wird als _Hostname_ der des NUT-Servers eingetragen. Die Portnummer bleibt im Normalfall auf _3493_. Die Authentifikation ist nur auszufüllen, wenn das vom NUT-Server
+vorgegeben ist.
 
-In dem Konfigurationsformular der NUT-Instanz kann man konfigurieren, welche Variablen übernommen werden sollen.
+Als _USV-Identifikation_ ist die von NUT-Server vorgesehenen Identifikation der USV anzugeben.
+Wenn man die nicht weis, wie folgt vorgehen:
+Die Konfiguration mit eintrågenen _Hostnamen_ speichern, dann die Aktion _Zugang prüfen_ auslösen. Hier werden dann die verfügbaren Identifikationen nausgegeben.
 
-### c. Anpassung des NUT
+In der Tabelle _Variablen_ kann man auswählen, welche Variablen man übernehmen möchte, die wichtigsten Variablen stehen hier zur Verfügung…
+
+
+### c. Anpassung des NUT-Servers
 
 ## 4. Funktionsreferenz
 
@@ -103,5 +108,5 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 0.0 @ xx.xx.xxxx xx:xx
+- 1.0 @ xx.xx.xxxx xx:xx
   - Initiale Version
