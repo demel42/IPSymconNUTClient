@@ -196,6 +196,18 @@ class NUTClient extends IPSModule
             }
         }
 
+        $refs = $this->GetReferenceList();
+        foreach ($refs as $ref) {
+            $this->UnregisterReference($ref);
+        }
+        $propertyNames = ['convert_script'];
+        foreach ($propertyNames as $name) {
+            $oid = $this->ReadPropertyInteger($name);
+            if ($oid > 0) {
+                $this->RegisterReference($oid);
+            }
+        }
+
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->SetUpdateInterval();
         }
@@ -653,20 +665,20 @@ class NUTClient extends IPSModule
                         continue;
                     }
 
-                if ($convert_script > 0) {
-                    $vartype = $this->GetArrayElem($field, 'vartype', -1);
-                    $info = [
-                        'InstanceID'    => $this->InstanceID,
-                        'ident'         => $ident,
-                        'vartype'       => $vartype,
-                        'value'         => $value,
-                    ];
-                    $r = IPS_RunScriptWaitEx($convert_script, $info);
-                    $this->SendDebug(__FUNCTION__, 'convert: ident=' . $ident . ', orgval=' . $value . ', value=' . ($r == false ? '<nop>' : $r), 0);
-                    if ($r != false) {
-                        $value = $r;
+                    if ($convert_script > 0) {
+                        $vartype = $this->GetArrayElem($field, 'vartype', -1);
+                        $info = [
+                            'InstanceID'    => $this->InstanceID,
+                            'ident'         => $ident,
+                            'vartype'       => $vartype,
+                            'value'         => $value,
+                        ];
+                        $r = IPS_RunScriptWaitEx($convert_script, $info);
+                        $this->SendDebug(__FUNCTION__, 'convert: ident=' . $ident . ', orgval=' . $value . ', value=' . ($r == false ? '<nop>' : $r), 0);
+                        if ($r != false) {
+                            $value = $r;
+                        }
                     }
-                }
 
                     $ident = 'DP_' . str_replace('.', '_', $ident);
                     if ($ident == 'DP_ups_status') {
