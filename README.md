@@ -71,9 +71,11 @@ vorgegeben ist.
 
 Als _USV-Identifikation_ ist die von NUT-Server vorgesehenen Identifikation der USV anzugeben.
 Wenn man die nicht weis, wie folgt vorgehen:
-Die Konfiguration mit eintrågenen _Hostnamen_ speichern, dann die Aktion _Zugang prüfen_ auslösen. Hier werden dann die verfügbaren Identifikationen nausgegeben.
+- die Konfiguration mit eintragenen _Hostnamen_ speichern
+- dann die Aktion _Zugang prüfen_ auslösen.<br>
+Hier werden dann die verfügbaren Identifikationen nausgegeben.
 
-In dem Panel _Variablen_ gibt es zweil Tabellen
+In dem Panel _Variablen_ gibt es zwei Tabellen
 1. _vordefinierte Datenpunkte_<br>
 hier finden sich die wichtigsten Datenpunkte; für jeder Datenpunkt wird vom Modul der richtige Variablentyp und Variablenprofil bei der Anlage der Variablen sowie eine passende Bezeichnung gewählt.
 
