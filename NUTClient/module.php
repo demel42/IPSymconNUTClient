@@ -258,30 +258,23 @@ class NUTClient extends IPSModule
         return $form;
     }
 
-    public function UpdateFields(string $fieldname)
+    public function UpdateFields(object $use_fields)
     {
-        switch ($fieldname) {
-            case 'use_fields':
-                $values = [];
-                $fieldMap = $this->getFieldMap();
-                $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
-                foreach ($fieldMap as $map) {
-                    $ident = $this->GetArrayElem($map, 'ident', '');
-                    $desc = $this->GetArrayElem($map, 'desc', '');
-                    $use = false;
-                    foreach ($use_fields as $field) {
-                        if ($ident == $this->GetArrayElem($field, 'ident', '')) {
-                            $use = (bool) $this->GetArrayElem($field, 'use', false);
-                            break;
-                        }
-                    }
-                    $values[] = ['ident' => $ident, 'desc' => $this->Translate($desc), 'use' => $use];
+        $values = [];
+        $fieldMap = $this->getFieldMap();
+        foreach ($fieldMap as $map) {
+            $ident = $this->GetArrayElem($map, 'ident', '');
+            $desc = $this->GetArrayElem($map, 'desc', '');
+            $use = false;
+            foreach ($use_fields as $field) {
+                if ($ident == $this->GetArrayElem($field, 'ident', '')) {
+                    $use = (bool) $this->GetArrayElem($field, 'use', false);
+                    break;
                 }
-                $this->UpdateFormField('use_fields', 'values', json_encode($values));
-                break;
-            default:
-                break;
+            }
+            $values[] = ['ident' => $ident, 'desc' => $this->Translate($desc), 'use' => $use];
         }
+        $this->UpdateFormField('use_fields', 'values', json_encode($values));
     }
 
     protected function GetFormElements()
@@ -447,7 +440,7 @@ class NUTClient extends IPSModule
             'type'    => 'ExpansionPanel',
             'items'   => $items,
             'caption' => 'Variables',
-            // 'onClick' => 'NUTC_UpdateFields($id, "use_fields");'
+            // 'onClick' => 'NUTC_UpdateFields($id, $use_fields);'
         ];
 
         return $formElements;

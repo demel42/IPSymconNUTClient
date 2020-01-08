@@ -73,12 +73,58 @@ Als _USV-Identifikation_ ist die von NUT-Server vorgesehenen Identifikation der 
 Wenn man die nicht weis, wie folgt vorgehen:
 Die Konfiguration mit eintrågenen _Hostnamen_ speichern, dann die Aktion _Zugang prüfen_ auslösen. Hier werden dann die verfügbaren Identifikationen nausgegeben.
 
-In der Tabelle _Variablen_ kann man auswählen, welche Variablen man übernehmen möchte, die wichtigsten Variablen stehen hier zur Verfügung…
+In dem Panel _Variablen_ gibt es zweil Tabellen
+1. _vordefinierte Datenpunkte_<br>
+hier finden sich die wichtigsten Datenpunkte; für jeder Datenpunkt wird vom Modul der richtige Variablentyp und Variablenprofil bei der Anlage der Variablen sowie eine passende Bezeichnung gewählt.
+
+2. _zusätzliche Datenpunkte_<br>
+da es in dem Standard sehr viele Datenpunkte gibt und diese auch sogar variabel sind, können hierüber zusätzliche Datenpunkte angegeben werden. An dieser Stelle wird neben der Bezeichung auch der Varioablentyp definiert. Bezeichnung und Variablenprofil muss manuell dann im Objektbaum angepasst werden.
+
+Eine Übersicht der verfügbaren Variablen ist über die Schaltfläche _Beschreibung der Varіablen_ erreichbar (siehe [hier](https://networkupstools.org/docs/user-manual.chunked/apcs01.html#_examples)). Die von dem NUT-Server bereitgestellten Variablen kann man sich mittels _Anzeige der Variablen_ anschauen.
+
+Um Daten vor dem Speicherung zu können gibt es ein optionales Script, ein Muster findet sich in _docs/convert_script.php_.
+
+Wichtig: nach der Defintion der Variablen sollte man mit der Schaltfläche _Zugang prüfen_ überprüfen, ob alle gewünschten Variablen auch geliefert werden.
 
 
 ### c. Anpassung des NUT-Servers
 
+Hier muss ggfs der Zugriff vom IPS erlaubt werden, am Beispiel der Diskstation:
+- _Systemsteuerung_ auswählen
+- dann _Hardware & Energie_ öffnen
+- dort den Reiter _USV_ wählen
+- die Schaltfläche _Zugelassene DiskStation-Geräte_ betätigen
+- in dem Dialog dann die IP des IPS-Servers eintragen
+
 ## 4. Funktionsreferenz
+
+Mit Hilfe der Kommandos können die NUT-Funktionalitäten direkt genutzt werden, die Beschreibung der Kommandos siehe [hier](https://networkupstools.org/docs/developer-guide.chunked/ar01s09.html).
+
+`NUTC_function ExecuteList(int $InstanzID, string $subcmd, string $varname);`
+führt alle Unterkommandos von Typ _LIST_ aus.
+
+`NUTC_function ExecuteGet(int $InstanzID, string $subcmd, string $varname);`
+führt alle Unterkommandos von Typ _GET_ aus.
+
+`NUTC_function ExecuteSet(int $InstanzID, string $varname, string $value);`
+führt alle Unterkommandos von Typ _GET_ aus.
+
+`NUTC_function ExecuteCmd(int $InstanzID, string $cmdname);`
+führt alle Unterkommandos von Typ _INSTCMD_ aus.
+
+`NUTC_function ExecuteHelp(int $InstanzID);`
+führt alle Unterkommandos von Typ _HELP_ aus.
+
+`NUTC_function ExecuteVersion(int $InstanzID);`
+führt alle Unterkommandos von Typ _VER_ aus.
+
+`NUTC_function ExecuteLogin(int $InstanzID);`
+führt alle Unterkommandos von Typ _LOGIN_ aus.
+
+`NUTC_function ExecuteLogout(int $InstanzID);`
+führt alle Unterkommandos von Typ _LOGOUT_ aus.
+
+Die Nutzung der FUnktionen hängt aber von dem NUT-Server ab und setzt auch Kenntniss der [NUT-Dokumentation](https://networkupstools.org/) voraus!
 
 ## 5. Konfiguration
 
@@ -86,18 +132,32 @@ In der Tabelle _Variablen_ kann man auswählen, welche Variablen man übernehmen
 
 | Eigenschaft                           | Typ      | Standardwert | Beschreibung |
 | :------------------------------------ | :------  | :----------- | :----------- |
+| Hostname                              | string   |              | Hostname des NUT-Servers |
+| Port                                  | integer  | 3493         | Portnummer des NUT-Servers |
+| USV-ID                                | string   |              | Bezeichnung der USV innterhalb des NUT-Servers |
+| Aktualisierungsintervall              | integer  | 30           | Häufigkeit des Datenabrufs |
+|                                       |          |              | |
+| Benutzer                              | string   |              | Benutzername, sofern der NUT-Server so abgesichert ist |
+| Passwort                              | string   |              | Passをort zu dem Benutzernamen |
+|                                       |          |              | |
+| vordefinierte Datenpunkte             | Tabelle  |              | siehe oben |
+|  ... verwenden                        | bool     |              | Datenpunkt benutzen |
+|                                       |          |              | |
+| zusätzliche Datenpunkte               | Tabelle  |              | siehe oben |
+|  ... Datenpunkt                       | string   |              | der Datenpunkt dieser Variable |
+|  ... Variabentyp                      | integer  |              | der Datentyp, den die Variable haben soll |
+|                                       |          |              | |
+| Werte konvertieren                    | integer  |              | ein Script um enpfangene Daten anzupassen, bevor gespeichert wird |
 |                                       |          |              | |
 
 #### Variablenprofile
 
 Es werden folgende Variablenprofile angelegt:
-* Boolean<br>
-
 * Integer<br>
+NUTC.Frequency, NUTC.Percent, NUTC.sec, NUTC.sec, NUTC.Status
 
 * Float<br>
-
-* String<br>
+NUTC.Capacity, NUTC.Current, NUTC.Power, NUTC.Temperature, NUTC.Voltage
 
 ## 6. Anhang
 
@@ -108,5 +168,5 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.0 @ xx.xx.xxxx xx:xx
+- 1.0 @ 08.01.2020 18:09
   - Initiale Version
