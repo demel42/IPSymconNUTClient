@@ -36,7 +36,7 @@ Anschließend oben rechts auf das Symbol für den Modulstore (IP-Symcon > 5.1) k
 
 ![Store](docs/de/img/store_icon.png?raw=true "open store")
 
-Im Suchfeld nun _NUT-Client eingeben, das Modul auswählen und auf _Installieren_ drücken.
+Im Suchfeld nun _NUT-Client_ eingeben, das Modul auswählen und auf _Installieren_ drücken.
 
 #### Alternatives Installieren über Modules Instanz (IP-Symcon < 5.1)
 
