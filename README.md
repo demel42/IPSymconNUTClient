@@ -72,8 +72,8 @@ vorgegeben ist.
 Als _USV-Identifikation_ ist die von NUT-Server vorgesehenen Identifikation der USV anzugeben.
 Wenn man die nicht weis, wie folgt vorgehen:
 - die Konfiguration mit eintragenen _Hostnamen_ speichern
-- dann die Aktion _Zugang prüfen_ auslösen.<br>
-Hier werden dann die verfügbaren Identifikationen nausgegeben.
+- die Schaltfläche _Zugang prüfen_ auslösen
+- dann werden die verfügbaren Identifikationen ausgegeben.
 
 In dem Panel _Variablen_ gibt es zwei Tabellen
 1. _vordefinierte Datenpunkte_<br>
@@ -140,7 +140,7 @@ Die Nutzung der FUnktionen hängt aber von dem NUT-Server ab und setzt auch Kenn
 | Aktualisierungsintervall              | integer  | 30           | Häufigkeit des Datenabrufs |
 |                                       |          |              | |
 | Benutzer                              | string   |              | Benutzername, sofern der NUT-Server so abgesichert ist |
-| Passwort                              | string   |              | Passをort zu dem Benutzernamen |
+| Passwort                              | string   |              | Passwort zu dem Benutzernamen |
 |                                       |          |              | |
 | vordefinierte Datenpunkte             | Tabelle  |              | siehe oben |
 |  ... verwenden                        | bool     |              | Datenpunkt benutzen |
