@@ -36,7 +36,7 @@ Anschließend oben rechts auf das Symbol für den Modulstore (IP-Symcon > 5.1) k
 
 ![Store](docs/de/img/store_icon.png?raw=true "open store")
 
-Im Suchfeld nun _NUT-Client eingeben, das Modul auswählen und auf _Installieren_ drücken.
+Im Suchfeld nun _NUT-Client_ eingeben, das Modul auswählen und auf _Installieren_ drücken.
 
 #### Alternatives Installieren über Modules Instanz (IP-Symcon < 5.1)
 
@@ -71,9 +71,11 @@ vorgegeben ist.
 
 Als _USV-Identifikation_ ist die von NUT-Server vorgesehenen Identifikation der USV anzugeben.
 Wenn man die nicht weis, wie folgt vorgehen:
-Die Konfiguration mit eintrågenen _Hostnamen_ speichern, dann die Aktion _Zugang prüfen_ auslösen. Hier werden dann die verfügbaren Identifikationen nausgegeben.
+- die Konfiguration mit eintragenen _Hostnamen_ speichern
+- die Schaltfläche _Zugang prüfen_ auslösen
+- dann werden die verfügbaren Identifikationen ausgegeben.
 
-In dem Panel _Variablen_ gibt es zweil Tabellen
+In dem Panel _Variablen_ gibt es zwei Tabellen
 1. _vordefinierte Datenpunkte_<br>
 hier finden sich die wichtigsten Datenpunkte; für jeder Datenpunkt wird vom Modul der richtige Variablentyp und Variablenprofil bei der Anlage der Variablen sowie eine passende Bezeichnung gewählt.
 
@@ -138,7 +140,7 @@ Die Nutzung der FUnktionen hängt aber von dem NUT-Server ab und setzt auch Kenn
 | Aktualisierungsintervall              | integer  | 30           | Häufigkeit des Datenabrufs |
 |                                       |          |              | |
 | Benutzer                              | string   |              | Benutzername, sofern der NUT-Server so abgesichert ist |
-| Passwort                              | string   |              | Passをort zu dem Benutzernamen |
+| Passwort                              | string   |              | Passwort zu dem Benutzernamen |
 |                                       |          |              | |
 | vordefinierte Datenpunkte             | Tabelle  |              | siehe oben |
 |  ... verwenden                        | bool     |              | Datenpunkt benutzen |
