@@ -616,6 +616,10 @@ class NUTClient extends IPSModule
 
         $vars = $this->ExecuteList('VAR', '');
         $this->SendDebug(__FUNCTION__, 'data=' . print_r($vars, true), 0);
+		if ($vars == false) {
+			$this->SetStatus(IS_NOSERVICE);
+			return;
+		}
 
         $fieldMap = $this->getFieldMap();
         $this->SendDebug(__FUNCTION__, 'fieldMap="' . print_r($fieldMap, true) . '"', 0);
@@ -778,6 +782,7 @@ class NUTClient extends IPSModule
 
         $info = $model . ' (#' . $serial . ')';
         $this->SetSummary($info);
+		$this->SetStatus(IS_ACTIVE);
     }
 
     private function doCommunication($fp, $cmd, $args, &$lines)
@@ -845,9 +850,17 @@ class NUTClient extends IPSModule
         $hostname = $this->ReadPropertyString('hostname');
         $port = $this->ReadPropertyInteger('port');
 
-        $fp = fsockopen($hostname, $port, $errno, $errstr, 5);
+        $fp = @fsockopen($hostname, $port, $errno, $errstr, 5);
         if (!$fp) {
             $this->SendDebug(__FUNCTION__, 'fsockopen(' . $hostname . ',' . $port . ') failed: error=' . $errstr . '(' . $errno . ')', 0);
+			$use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
+			foreach ($use_fields as $field) {
+				if ($this->GetArrayElem($field, 'ident', '') == 'DP_ups_status') {
+					$this->SetValue('DP_ups_status', NUTC_STATUS_UNKNOWN);
+					$this->SetValue('DP_ups_status_info', $this->Translate('unable to connect NUT-server'));
+				}
+			}
+            $this->SetValue('LastUpdate', time());
             return false;
         }
         stream_set_timeout($fp, 2);

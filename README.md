@@ -169,5 +169,8 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.1 @ 02.02.2020 17:52
+  - verbesserte Behandlung wenn der NUT-server nicht erreichbar ist
+
 - 1.0 @ 08.01.2020 18:09
   - Initiale Version

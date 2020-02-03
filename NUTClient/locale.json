@@ -37,6 +37,7 @@
 			"UPS found": "USV gefunden",
 			"Warning: the specified UPS ID is unknown": "Achtung: die angegebenen USV-ID ist unbekannt",
 			"datapoints not found in data": "nicht in den Daten enthaltenen Datenpunkte",
+			"unable to connect NUT-server": "keine Verbindung zum NUT-Server",
 
 			"Status": "Status",
 			"Additional status": "Statuszusatz",
@@ -83,6 +84,7 @@
 			"Instance is inactive": "Instanz ist inaktiv",
 			"Instance is not created": "Instanz wurde nicht erzeugt",
 
+			"Instance is inactive (no service)": "Instanz ist inaktiv (Service nicht verfügbar)",
 			"Instance is inactive (ups-id missing)": "Instanz ist inaktiv (USV-ID fehlt)",
 			"Instance is inactive (ups-id unknown)": "Instanz ist inaktiv (USV-ID ist unbekannt)"
 		}
