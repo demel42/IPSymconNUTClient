@@ -169,6 +169,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.2 @ 13.07.2020 14:56
+  - LICENSE.md hinzugefügt
+
 - 1.1 @ 02.02.2020 17:52
   - verbesserte Behandlung wenn der NUT-server nicht erreichbar ist
 
