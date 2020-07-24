@@ -3,28 +3,28 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
-
-if (!defined('NUTC_STATUSNONE')) {
-    define('NUTC_STATUS_OL', 0);
-    define('NUTC_STATUS_OB', 1);
-    define('NUTC_STATUS_LB', 2);
-    define('NUTC_STATUS_HB', 3);
-    define('NUTC_STATUS_RB', 4);
-    define('NUTC_STATUS_CHRG', 5);
-    define('NUTC_STATUS_DISCHRG', 6);
-    define('NUTC_STATUS_BYPASS', 7);
-    define('NUTC_STATUS_CAL', 8);
-    define('NUTC_STATUS_OFF', 9);
-    define('NUTC_STATUS_OVER', 10);
-    define('NUTC_STATUS_TRIM', 11);
-    define('NUTC_STATUS_BOOST', 12);
-    define('NUTC_STATUS_FSD', 13);
-    define('NUTC_STATUS_UNKNOWN', 14);
-}
+require_once __DIR__ . '/../libs/local.php';   // lokale Funktionen
 
 class NUTClient extends IPSModule
 {
-    use NUTClientCommon;
+    use NUTClientCommonLib;
+    use NUTClientLocalLib;
+
+    public static $NUTC_STATUS_OL = 0;
+    public static $NUTC_STATUS_OB = 1;
+    public static $NUTC_STATUS_LB = 2;
+    public static $NUTC_STATUS_HB = 3;
+    public static $NUTC_STATUS_RB = 4;
+    public static $NUTC_STATUS_CHRG = 5;
+    public static $NUTC_STATUS_DISCHRG = 6;
+    public static $NUTC_STATUS_BYPASS = 7;
+    public static $NUTC_STATUS_CAL = 8;
+    public static $NUTC_STATUS_OFF = 9;
+    public static $NUTC_STATUS_OVER = 10;
+    public static $NUTC_STATUS_TRIM = 11;
+    public static $NUTC_STATUS_BOOST = 12;
+    public static $NUTC_STATUS_FSD = 13;
+    public static $NUTC_STATUS_UNKNOWN = 14;
 
     public function Create()
     {
@@ -51,21 +51,21 @@ class NUTClient extends IPSModule
         $this->CreateVarProfile('NUTC.Percent', VARIABLETYPE_FLOAT, ' %', 0, 0, 0, 0, '');
 
         $associations = [];
-        $associations[] = ['Wert' => NUTC_STATUS_OL,      'Name' => $this->Translate('on line'), 'Farbe' => 0x008000];
-        $associations[] = ['Wert' => NUTC_STATUS_OB,      'Name' => $this->Translate('on battery'), 'Farbe' => 0xFFA500];
-        $associations[] = ['Wert' => NUTC_STATUS_LB,      'Name' => $this->Translate('low battery'), 'Farbe' => 0xEE0000];
-        $associations[] = ['Wert' => NUTC_STATUS_HB,      'Name' => $this->Translate('high battery'), 'Farbe' => -1];
-        $associations[] = ['Wert' => NUTC_STATUS_RB,      'Name' => $this->Translate('battery needs replacement'), 'Farbe' => 0xFFFF00];
-        $associations[] = ['Wert' => NUTC_STATUS_CHRG,    'Name' => $this->Translate('battery is charging'), 'Farbe' => -1];
-        $associations[] = ['Wert' => NUTC_STATUS_DISCHRG, 'Name' => $this->Translate('battery is discharging'), 'Farbe' => -1];
-        $associations[] = ['Wert' => NUTC_STATUS_BYPASS,  'Name' => $this->Translate('bypass circuit activated'), 'Farbe' => -1];
-        $associations[] = ['Wert' => NUTC_STATUS_CAL,     'Name' => $this->Translate('UPS is calibrating'), 'Farbe' => -1];
-        $associations[] = ['Wert' => NUTC_STATUS_OFF,     'Name' => $this->Translate('UPS is offline'), 'Farbe' => 0xFF00FF];
-        $associations[] = ['Wert' => NUTC_STATUS_OVER,    'Name' => $this->Translate('UPS is overloaded'), 'Farbe' => 0xFF00FF];
-        $associations[] = ['Wert' => NUTC_STATUS_TRIM,    'Name' => $this->Translate('trimming incoming voltage'), 'Farbe' => -1];
-        $associations[] = ['Wert' => NUTC_STATUS_BOOST,   'Name' => $this->Translate('boosting incoming voltage'), 'Farbe' => -1];
-        $associations[] = ['Wert' => NUTC_STATUS_FSD,     'Name' => $this->Translate('forced shutdown'), 'Farbe' => 0xFFA500];
-        $associations[] = ['Wert' => NUTC_STATUS_UNKNOWN, 'Name' => $this->Translate('unknown state'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_OL,      'Name' => $this->Translate('on line'), 'Farbe' => 0x008000];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_OB,      'Name' => $this->Translate('on battery'), 'Farbe' => 0xFFA500];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_LB,      'Name' => $this->Translate('low battery'), 'Farbe' => 0xEE0000];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_HB,      'Name' => $this->Translate('high battery'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_RB,      'Name' => $this->Translate('battery needs replacement'), 'Farbe' => 0xFFFF00];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_CHRG,    'Name' => $this->Translate('battery is charging'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_DISCHRG, 'Name' => $this->Translate('battery is discharging'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_BYPASS,  'Name' => $this->Translate('bypass circuit activated'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_CAL,     'Name' => $this->Translate('UPS is calibrating'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_OFF,     'Name' => $this->Translate('UPS is offline'), 'Farbe' => 0xFF00FF];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_OVER,    'Name' => $this->Translate('UPS is overloaded'), 'Farbe' => 0xFF00FF];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_TRIM,    'Name' => $this->Translate('trimming incoming voltage'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_BOOST,   'Name' => $this->Translate('boosting incoming voltage'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_FSD,     'Name' => $this->Translate('forced shutdown'), 'Farbe' => 0xFFA500];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_UNKNOWN, 'Name' => $this->Translate('unknown state'), 'Farbe' => -1];
         $this->CreateVarProfile('NUTC.Status', VARIABLETYPE_INTEGER, '', 0, 0, 0, 1, '', $associations);
 
         $this->CreateVarProfile('NUTC.sec', VARIABLETYPE_INTEGER, ' s', 0, 0, 0, 0, 'Clock');
@@ -258,7 +258,7 @@ class NUTClient extends IPSModule
         return $form;
     }
 
-    public function UpdateFields(object $use_fields)
+    private function UpdateFields(object $use_fields)
     {
         $values = [];
         $fieldMap = $this->getFieldMap();
@@ -277,7 +277,7 @@ class NUTClient extends IPSModule
         $this->UpdateFormField('use_fields', 'values', json_encode($values));
     }
 
-    protected function GetFormElements()
+    private function GetFormElements()
     {
         $formElements = [];
 
@@ -488,7 +488,7 @@ class NUTClient extends IPSModule
         echo $txt;
     }
 
-    protected function GetFormActions()
+    private function GetFormActions()
     {
         $formActions = [];
 
@@ -856,7 +856,7 @@ class NUTClient extends IPSModule
             $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
             foreach ($use_fields as $field) {
                 if ($this->GetArrayElem($field, 'ident', '') == 'DP_ups_status') {
-                    $this->SetValue('DP_ups_status', NUTC_STATUS_UNKNOWN);
+                    $this->SetValue('DP_ups_status', self::$NUTC_STATUS_UNKNOWN);
                     $this->SetValue('DP_ups_status_info', $this->Translate('unable to connect NUT-server'));
                 }
             }
@@ -1172,77 +1172,77 @@ class NUTClient extends IPSModule
         $maps = [
             [
                 'tag'   => 'OL',
-                'code'  => NUTC_STATUS_OL,
+                'code'  => self::$NUTC_STATUS_OL,
                 'info'  => $this->Translate('on line')
             ],
             [
                 'tag'   => 'OB',
-                'code'  => NUTC_STATUS_OB,
+                'code'  => self::$NUTC_STATUS_OB,
                 'info'  => $this->Translate('on battery')
             ],
             [
                 'tag'   => 'LB',
-                'code'  => NUTC_STATUS_LB,
+                'code'  => self::$NUTC_STATUS_LB,
                 'info'  => $this->Translate('low battery')
             ],
             [
                 'tag'   => 'HB',
-                'code'  => NUTC_STATUS_HB,
+                'code'  => self::$NUTC_STATUS_HB,
                 'info'  => $this->Translate('high battery')
             ],
             [
                 'tag'   => 'RB',
-                'code'  => NUTC_STATUS_RB,
+                'code'  => self::$NUTC_STATUS_RB,
                 'info'  => $this->Translate('battery needs replacement')
             ],
             [
                 'tag'   => 'CHRG',
-                'code'  => NUTC_STATUS_CHRG,
+                'code'  => self::$NUTC_STATUS_CHRG,
                 'info'  => $this->Translate('battery is charging')
             ],
             [
                 'tag'   => 'DISCHRG',
-                'code'  => NUTC_STATUS_DISCHRG,
+                'code'  => self::$NUTC_STATUS_DISCHRG,
                 'info'  => $this->Translate('battery is discharging')
             ],
             [
                 'tag'   => 'BYPASS',
-                'code'  => NUTC_STATUS_BYPASS,
+                'code'  => self::$NUTC_STATUS_BYPASS,
                 'info'  => $this->Translate('bypass circuit activated')
             ],
             [
                 'tag'   => 'CAL',
-                'code'  => NUTC_STATUS_CAL,
+                'code'  => self::$NUTC_STATUS_CAL,
                 'info'  => $this->Translate('UPS is calibrating')
             ],
             [
                 'tag'   => 'OFF',
-                'code'  => NUTC_STATUS_OFF,
+                'code'  => self::$NUTC_STATUS_OFF,
                 'info'  => $this->Translate('UPS is offline')
             ],
             [
                 'tag'   => 'OVER',
-                'code'  => NUTC_STATUS_OVER,
+                'code'  => self::$NUTC_STATUS_OVER,
                 'info'  => $this->Translate('UPS is overloaded')
             ],
             [
                 'tag'   => 'TRIM',
-                'code'  => NUTC_STATUS_TRIM,
+                'code'  => self::$NUTC_STATUS_TRIM,
                 'info'  => $this->Translate('trimming incoming voltage')
             ],
             [
                 'tag'   => 'BOOST',
-                'code'  => NUTC_STATUS_BOOST,
+                'code'  => self::$NUTC_STATUS_BOOST,
                 'info'  => $this->Translate('boosting incoming voltage')
             ],
             [
                 'tag'   => 'FSD',
-                'code'  => NUTC_STATUS_FSD,
+                'code'  => self::$NUTC_STATUS_FSD,
                 'info'  => $this->Translate('forced shutdown')
             ],
         ];
 
-        $code = NUTC_STATUS_OFF;
+        $code = self::$NUTC_STATUS_OFF;
         $info = '';
 
         $tagV = explode(' ', $tags);

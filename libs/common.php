@@ -2,13 +2,7 @@
 
 declare(strict_types=1);
 
-if (!defined('IS_INVALIDCONFIG')) {
-    define('IS_NOSERVICE', IS_EBASE + 1);
-    define('IS_UPSIDMISSING', IS_EBASE + 2);
-    define('IS_UPSIDUNKNOWN', IS_EBASE + 3);
-}
-
-trait NUTClientCommon
+trait NUTClientCommonLib
 {
     protected function SetValue($Ident, $Value)
     {
@@ -193,21 +187,5 @@ trait NUTClientCommon
             return $bval ? 'true' : 'false';
         }
         return $bval;
-    }
-
-    private function GetFormStatus()
-    {
-        $formStatus = [];
-        $formStatus[] = ['code' => IS_CREATING, 'icon' => 'inactive', 'caption' => 'Instance getting created'];
-        $formStatus[] = ['code' => IS_ACTIVE, 'icon' => 'active', 'caption' => 'Instance is active'];
-        $formStatus[] = ['code' => IS_DELETING, 'icon' => 'inactive', 'caption' => 'Instance is deleted'];
-        $formStatus[] = ['code' => IS_INACTIVE, 'icon' => 'inactive', 'caption' => 'Instance is inactive'];
-        $formStatus[] = ['code' => IS_NOTCREATED, 'icon' => 'inactive', 'caption' => 'Instance is not created'];
-
-        $formStatus[] = ['code' => IS_NOSERVICE, 'icon' => 'error', 'caption' => 'Instance is inactive (no service)'];
-        $formStatus[] = ['code' => IS_UPSIDMISSING, 'icon' => 'error', 'caption' => 'Instance is inactive (ups-id missing)'];
-        $formStatus[] = ['code' => IS_UPSIDUNKNOWN, 'icon' => 'error', 'caption' => 'Instance is inactive (ups-id unknown)'];
-
-        return $formStatus;
     }
 }

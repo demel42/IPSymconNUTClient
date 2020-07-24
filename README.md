@@ -169,8 +169,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.2 @ 13.07.2020 14:56
+- 1.2 @ 24.07.2020 11:28 (beta)
   - LICENSE.md hinzugefügt
+  - intere Funktionen sind nun "private"
+  - define's durch statische Klassen-Variablen ersetzt
+  - lokale Funktionen aus common.php in locale.php verlagert
 
 - 1.1 @ 02.02.2020 17:52
   - verbesserte Behandlung wenn der NUT-server nicht erreichbar ist
