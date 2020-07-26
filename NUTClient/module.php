@@ -118,7 +118,7 @@ class NUTClient extends IPSModule
             }
         }
         if ($ups_found == false) {
-            $this->SetStatus(IS_UPSIDUNKNOWN);
+            $this->SetStatus(self::$IS_UPSIDUNKNOWN);
             return false;
         }
 
@@ -559,7 +559,7 @@ class NUTClient extends IPSModule
             }
             if ($ups_found == false) {
                 $txt .= PHP_EOL . $this->Translate('Warning: the specified UPS ID is unknown') . PHP_EOL;
-                $this->SetStatus(IS_UPSIDUNKNOWN);
+                $this->SetStatus(self::$IS_UPSIDUNKNOWN);
             }
 
             $b = false;
@@ -617,7 +617,7 @@ class NUTClient extends IPSModule
         $vars = $this->ExecuteList('VAR', '');
         $this->SendDebug(__FUNCTION__, 'data=' . print_r($vars, true), 0);
         if ($vars == false) {
-            $this->SetStatus(IS_NOSERVICE);
+            $this->SetStatus(self::$IS_NOSERVICE);
             return;
         }
 
