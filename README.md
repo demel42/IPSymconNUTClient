@@ -169,7 +169,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1I.2 @ 26.07.2020 14:49 (beta)
+- 1I.2 @ 26.07.2020 14:49
   - LICENSE.md hinzugefügt
   - intere Funktionen sind nun "private"
   - define's durch statische Klassen-Variablen ersetzt
