@@ -21,6 +21,7 @@
 			"Use": "verwenden",
 			"Variable type": "Variablentyp",
 			"convert values": "Werte konvertieren",
+			"Got no datapoints": "keine Datenpunkte empfangen",
 
 			"Update data every X seconds": "Aktualisieren Daten alle X Sekunden",
 			"Seconds": "Sekunden",
@@ -62,7 +63,7 @@
 			"Output frequency": "Ausgangsfrequenz",
 			"Last update": "letzte Aktualisierung",
 
-			"on line": "Online",
+			"on line": "Netzbetrieb",
 			"on battery": "Batteriebetrieb",
 			"low battery": "niedriger Batterieladung",
 			"high battery": "hohe Batterieladung",
@@ -70,13 +71,15 @@
 			"battery is charging": "Batterie lädt",
 			"battery is discharging": "Batterie entlädt",
 			"bypass circuit activated": "Bypass aktiviert",
-			"UPS is calibrating": "USV wird kalibriert",
-			"UPS is offline": "USV ist inaktiv",
-			"UPS is overloaded": "USV ist überlastet",
+			"is calibrating": "wird kalibriert",
+			"offline": "ausgeschaltet",
+			"overloaded": "überlastetet",
 			"trimming incoming voltage": "Eingangsspannung wird begrenzt",
 			"boosting incoming voltage": "Eingangsspannung wird erhöhen",
 			"forced shutdown": "erzwungenes Herunterfahren",
 			"unknown state": "unbekannter Zustand",
+
+			"NUT-service not reachable": "NUT-Dienst ist nicht erreichbar",
 
 			"Instance getting created": "Instanz wird erstellt",
 			"Instance is active": "Instanz ist aktiv",

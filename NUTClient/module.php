@@ -59,9 +59,9 @@ class NUTClient extends IPSModule
         $associations[] = ['Wert' => self::$NUTC_STATUS_CHRG,    'Name' => $this->Translate('battery is charging'), 'Farbe' => -1];
         $associations[] = ['Wert' => self::$NUTC_STATUS_DISCHRG, 'Name' => $this->Translate('battery is discharging'), 'Farbe' => -1];
         $associations[] = ['Wert' => self::$NUTC_STATUS_BYPASS,  'Name' => $this->Translate('bypass circuit activated'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_CAL,     'Name' => $this->Translate('UPS is calibrating'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_OFF,     'Name' => $this->Translate('UPS is offline'), 'Farbe' => 0xFF00FF];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_OVER,    'Name' => $this->Translate('UPS is overloaded'), 'Farbe' => 0xFF00FF];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_CAL,     'Name' => $this->Translate('is calibrating'), 'Farbe' => -1];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_OFF,     'Name' => $this->Translate('offline'), 'Farbe' => 0xFF00FF];
+        $associations[] = ['Wert' => self::$NUTC_STATUS_OVER,    'Name' => $this->Translate('overloaded'), 'Farbe' => 0xFF00FF];
         $associations[] = ['Wert' => self::$NUTC_STATUS_TRIM,    'Name' => $this->Translate('trimming incoming voltage'), 'Farbe' => -1];
         $associations[] = ['Wert' => self::$NUTC_STATUS_BOOST,   'Name' => $this->Translate('boosting incoming voltage'), 'Farbe' => -1];
         $associations[] = ['Wert' => self::$NUTC_STATUS_FSD,     'Name' => $this->Translate('forced shutdown'), 'Farbe' => 0xFFA500];
@@ -457,32 +457,36 @@ class NUTClient extends IPSModule
         $fieldMap = $this->getFieldMap();
         $vars = $this->ExecuteList('VAR', '');
 
-        $txt = $this->translate('predefined datapoints') . PHP_EOL;
-        foreach ($fieldMap as $map) {
-            $ident = $this->GetArrayElem($map, 'ident', '');
-            foreach ($vars as $var) {
-                if ($ident == $var['varname']) {
-                    $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
-                    break;
-                }
-            }
-        }
-        $txt .= PHP_EOL;
-
-        $txt .= $this->translate('additional datapoints') . PHP_EOL;
-        foreach ($vars as $var) {
-            $predef = false;
+        if ($vars != false) {
+            $txt = $this->translate('Predefined datapoints') . PHP_EOL;
             foreach ($fieldMap as $map) {
                 $ident = $this->GetArrayElem($map, 'ident', '');
-                if ($ident == $var['varname']) {
-                    $predef = true;
-                    break;
+                foreach ($vars as $var) {
+                    if ($ident == $var['varname']) {
+                        $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
+                        break;
+                    }
                 }
             }
-            if ($predef) {
-                continue;
+            $txt .= PHP_EOL;
+
+            $txt .= $this->translate('Additional datapoints') . PHP_EOL;
+            foreach ($vars as $var) {
+                $predef = false;
+                foreach ($fieldMap as $map) {
+                    $ident = $this->GetArrayElem($map, 'ident', '');
+                    if ($ident == $var['varname']) {
+                        $predef = true;
+                        break;
+                    }
+                }
+                if ($predef) {
+                    continue;
+                }
+                $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
             }
-            $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
+        } else {
+            $txt = $this->translate('Got no datapoints') . PHP_EOL;
         }
 
         echo $txt;
@@ -617,6 +621,8 @@ class NUTClient extends IPSModule
         $vars = $this->ExecuteList('VAR', '');
         $this->SendDebug(__FUNCTION__, 'data=' . print_r($vars, true), 0);
         if ($vars == false) {
+            $this->SetValue('DP_ups_status', self::$NUTC_STATUS_OFF);
+            $this->SetValue('DP_ups_status_info', $this->Translate('NUT-service not reachable'));
             $this->SetStatus(self::$IS_NOSERVICE);
             return;
         }
@@ -1171,15 +1177,22 @@ class NUTClient extends IPSModule
     {
         $maps = [
             [
-                'tag'   => 'OL',
-                'code'  => self::$NUTC_STATUS_OL,
-                'info'  => $this->Translate('on line')
+                'tag'   => 'RB',
+                'code'  => self::$NUTC_STATUS_RB,
+                'info'  => $this->Translate('battery needs replacement')
             ],
             [
-                'tag'   => 'OB',
-                'code'  => self::$NUTC_STATUS_OB,
-                'info'  => $this->Translate('on battery')
+                'tag'   => 'OVER',
+                'code'  => self::$NUTC_STATUS_OVER,
+                'info'  => $this->Translate('overloaded')
             ],
+
+            [
+                'tag'   => 'FSD',
+                'code'  => self::$NUTC_STATUS_FSD,
+                'info'  => $this->Translate('forced shutdown')
+            ],
+
             [
                 'tag'   => 'LB',
                 'code'  => self::$NUTC_STATUS_LB,
@@ -1191,10 +1204,21 @@ class NUTClient extends IPSModule
                 'info'  => $this->Translate('high battery')
             ],
             [
-                'tag'   => 'RB',
-                'code'  => self::$NUTC_STATUS_RB,
-                'info'  => $this->Translate('battery needs replacement')
+                'tag'   => 'OFF',
+                'code'  => self::$NUTC_STATUS_OFF,
+                'info'  => $this->Translate('offline')
             ],
+            [
+                'tag'   => 'OL',
+                'code'  => self::$NUTC_STATUS_OL,
+                'info'  => $this->Translate('on line')
+            ],
+            [
+                'tag'   => 'OB',
+                'code'  => self::$NUTC_STATUS_OB,
+                'info'  => $this->Translate('on battery')
+            ],
+
             [
                 'tag'   => 'CHRG',
                 'code'  => self::$NUTC_STATUS_CHRG,
@@ -1213,17 +1237,7 @@ class NUTClient extends IPSModule
             [
                 'tag'   => 'CAL',
                 'code'  => self::$NUTC_STATUS_CAL,
-                'info'  => $this->Translate('UPS is calibrating')
-            ],
-            [
-                'tag'   => 'OFF',
-                'code'  => self::$NUTC_STATUS_OFF,
-                'info'  => $this->Translate('UPS is offline')
-            ],
-            [
-                'tag'   => 'OVER',
-                'code'  => self::$NUTC_STATUS_OVER,
-                'info'  => $this->Translate('UPS is overloaded')
+                'info'  => $this->Translate('calibrating')
             ],
             [
                 'tag'   => 'TRIM',
@@ -1234,11 +1248,6 @@ class NUTClient extends IPSModule
                 'tag'   => 'BOOST',
                 'code'  => self::$NUTC_STATUS_BOOST,
                 'info'  => $this->Translate('boosting incoming voltage')
-            ],
-            [
-                'tag'   => 'FSD',
-                'code'  => self::$NUTC_STATUS_FSD,
-                'info'  => $this->Translate('forced shutdown')
             ],
         ];
 

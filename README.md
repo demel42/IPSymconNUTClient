@@ -169,7 +169,12 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1I.2 @ 26.07.2020 14:49
+- 1.3 @ 07.03.2021 14:53
+  - PHP_CS_FIXER_IGNORE_ENV=1 in github/workflows/style.yml eingefügt
+  - Reihenfolgde der Auswertung der Stati nach Relevanz korrigiert, zweitrangige Stati werden als im Feld 'Statuszusatz' ausgegeben
+  - Test des Profils 'NUTC.Status' angepasst - bitte vor dem Update Profil löschen
+
+- 1.2 @ 26.07.2020 14:49
   - LICENSE.md hinzugefügt
   - intere Funktionen sind nun "private"
   - define's durch statische Klassen-Variablen ersetzt
