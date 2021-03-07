@@ -111,6 +111,10 @@ class NUTClient extends IPSModule
 
         $upsname = $this->ReadPropertyString('upsname');
         $ups_list = $this->ExecuteList('UPS', '');
+        if ($ups_list == false) {
+            $this->SetStatus(self::$IS_NOSERVICE);
+            return false;
+        }
         $ups_found = false;
         foreach ($ups_list as $ups) {
             if ($ups['id'] == $upsname) {
