@@ -860,7 +860,15 @@ class NUTClient extends IPSModule
         $hostname = $this->ReadPropertyString('hostname');
         $port = $this->ReadPropertyInteger('port');
 
-        $fp = @fsockopen($hostname, $port, $errno, $errstr, 5);
+        $fp = false;
+        for ($i = 0; $i <= 5 && !$fp; $i++) {
+            $fp = @fsockopen($hostname, $port, $errno, $errstr, 5);
+            if ($fp) {
+                break;
+            }
+            $this->SendDebug(__FUNCTION__, 'fsockopen(' . $hostname . ',' . $port . ') failed: error=' . $errstr . '(' . $errno . ') #' . $i, 0);
+            IPS_Sleep(250);
+        }
         if (!$fp) {
             $this->SendDebug(__FUNCTION__, 'fsockopen(' . $hostname . ',' . $port . ') failed: error=' . $errstr . '(' . $errno . ')', 0);
             $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
