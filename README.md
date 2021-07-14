@@ -169,6 +169,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.4 @ 14.07.2021 17:39
+  - automatische Wiederholung, wenn die Verbindung zum NUTServer nicht funktioniert
+  - Schalter "Instanz ist deaktiviert" umbenannt in "Instanz deaktivieren"
+
 - 1.3 @ 07.03.2021 14:53
   - PHP_CS_FIXER_IGNORE_ENV=1 in github/workflows/style.yml eingefügt
   - Reihenfolgde der Auswertung der Stati nach Relevanz korrigiert, zweitrangige Stati werden als im Feld 'Statuszusatz' ausgegeben
