@@ -1,6 +1,6 @@
 # IPSymconNUT
 
-[![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.3+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+[![IPS-Version](https://img.shields.io/badge/Symcon_Version-6.0+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -22,7 +22,7 @@ Abfrage der Daten einer USV via Network-UPS-Tool (**NUT**)
 
 ## 2. Voraussetzungen
 
- - IP-Symcon ab Version 5.3
+ - IP-Symcon ab Version 6.0
  - eine USV mit eingerichtetem NUT-Server, z.B. eine an einer Synology Diskstation angeschlossene USV
 
 ## 3. Installation
@@ -155,10 +155,18 @@ Die Nutzung der FUnktionen hängt aber von dem NUT-Server ab und setzt auch Kenn
 
 Es werden folgende Variablenprofile angelegt:
 * Integer<br>
-NUTC.Frequency, NUTC.Percent, NUTC.sec, NUTC.sec, NUTC.Status
+NUTC.Frequency,
+NUTC.Percent,
+NUTC.sec,
+NUTC.sec,
+NUTC.Status
 
 * Float<br>
-NUTC.Capacity, NUTC.Current, NUTC.Power, NUTC.Temperature, NUTC.Voltage
+NUTC.Capacity,
+NUTC.Current,
+NUTC.Power,
+NUTC.Temperature,
+NUTC.Voltage
 
 ## 6. Anhang
 
@@ -168,6 +176,13 @@ GUIDs
   - NUTClient: `{D7648DB1-3D1D-F0A8-BA2D-01EA50AF6F4C}`
 
 ## 7. Versions-Historie
+
+- 1.5 @ 26.04.2022 16:34
+  - Anpassungen an IPS 6.2 (Prüfung auf ungültige ID's)
+  - IPS-Version ist nun minimal 6.0
+  - Anzeige der Referenzen der Instanz incl. Statusvariablen und Instanz-Timer
+  - Implememtierung einer Update-Logik
+  - diverse interne Änderungen
 
 - 1.4 @ 14.07.2021 17:39
   - automatische Wiederholung, wenn die Verbindung zum NUTServer nicht funktioniert

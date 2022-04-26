@@ -2,29 +2,13 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
-require_once __DIR__ . '/../libs/local.php';   // lokale Funktionen
+require_once __DIR__ . '/../libs/common.php';
+require_once __DIR__ . '/../libs/local.php';
 
 class NUTClient extends IPSModule
 {
-    use NUTClientCommonLib;
+    use NUTClient\StubsCommonLib;
     use NUTClientLocalLib;
-
-    public static $NUTC_STATUS_OL = 0;
-    public static $NUTC_STATUS_OB = 1;
-    public static $NUTC_STATUS_LB = 2;
-    public static $NUTC_STATUS_HB = 3;
-    public static $NUTC_STATUS_RB = 4;
-    public static $NUTC_STATUS_CHRG = 5;
-    public static $NUTC_STATUS_DISCHRG = 6;
-    public static $NUTC_STATUS_BYPASS = 7;
-    public static $NUTC_STATUS_CAL = 8;
-    public static $NUTC_STATUS_OFF = 9;
-    public static $NUTC_STATUS_OVER = 10;
-    public static $NUTC_STATUS_TRIM = 11;
-    public static $NUTC_STATUS_BOOST = 12;
-    public static $NUTC_STATUS_FSD = 13;
-    public static $NUTC_STATUS_UNKNOWN = 14;
 
     public function Create()
     {
@@ -47,45 +31,43 @@ class NUTClient extends IPSModule
         $this->RegisterPropertyString('add_fields', '[]');
         $this->RegisterPropertyInteger('convert_script', 0);
 
-        $this->CreateVarProfile('NUTC.sec', VARIABLETYPE_INTEGER, ' s', 0, 0, 0, 0, 'Clock');
-        $this->CreateVarProfile('NUTC.Percent', VARIABLETYPE_FLOAT, ' %', 0, 0, 0, 0, '');
+        $this->RegisterAttributeString('UpdateInfo', '');
 
-        $associations = [];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_OL,      'Name' => $this->Translate('on line'), 'Farbe' => 0x008000];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_OB,      'Name' => $this->Translate('on battery'), 'Farbe' => 0xFFA500];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_LB,      'Name' => $this->Translate('low battery'), 'Farbe' => 0xEE0000];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_HB,      'Name' => $this->Translate('high battery'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_RB,      'Name' => $this->Translate('battery needs replacement'), 'Farbe' => 0xFFFF00];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_CHRG,    'Name' => $this->Translate('battery is charging'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_DISCHRG, 'Name' => $this->Translate('battery is discharging'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_BYPASS,  'Name' => $this->Translate('bypass circuit activated'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_CAL,     'Name' => $this->Translate('is calibrating'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_OFF,     'Name' => $this->Translate('offline'), 'Farbe' => 0xFF00FF];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_OVER,    'Name' => $this->Translate('overloaded'), 'Farbe' => 0xFF00FF];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_TRIM,    'Name' => $this->Translate('trimming incoming voltage'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_BOOST,   'Name' => $this->Translate('boosting incoming voltage'), 'Farbe' => -1];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_FSD,     'Name' => $this->Translate('forced shutdown'), 'Farbe' => 0xFFA500];
-        $associations[] = ['Wert' => self::$NUTC_STATUS_UNKNOWN, 'Name' => $this->Translate('unknown state'), 'Farbe' => -1];
-        $this->CreateVarProfile('NUTC.Status', VARIABLETYPE_INTEGER, '', 0, 0, 0, 1, '', $associations);
+        $this->RegisterTimer('UpdateData', 0, $this->GetModulePrefix() . '_UpdateData(' . $this->InstanceID . ');');
 
-        $this->CreateVarProfile('NUTC.sec', VARIABLETYPE_INTEGER, ' s', 0, 0, 0, 0, 'Clock');
-        $this->CreateVarProfile('NUTC.Frequency', VARIABLETYPE_INTEGER, ' Hz', 0, 0, 0, 0, '');
-
-        $this->CreateVarProfile('NUTC.Temperature', VARIABLETYPE_FLOAT, ' °C', 0, 0, 0, 1, 'Temperature');
-        $this->CreateVarProfile('NUTC.Voltage', VARIABLETYPE_FLOAT, ' V', 0, 0, 0, 1, '');
-        $this->CreateVarProfile('NUTC.Current', VARIABLETYPE_FLOAT, ' A', 0, 0, 0, 0, '');
-        $this->CreateVarProfile('NUTC.Capacity', VARIABLETYPE_FLOAT, ' Ah', 0, 0, 0, 1, '');
-        $this->CreateVarProfile('NUTC.Power', VARIABLETYPE_FLOAT, ' W', 0, 0, 0, 0, '');
-
-        $this->RegisterTimer('UpdateData', 0, 'NUTC_UpdateData(' . $this->InstanceID . ');');
         $this->RegisterMessage(0, IPS_KERNELMESSAGE);
     }
 
-    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    private function CheckModuleConfiguration()
     {
-        parent::MessageSink($TimeStamp, $SenderID, $Message, $Data);
+        $r = [];
 
-        if ($Message == IPS_KERNELMESSAGE && $Data[0] == KR_READY) {
+        $hostname = $this->ReadPropertyString('hostname');
+        if ($hostname == '') {
+            $this->SendDebug(__FUNCTION__, '"hostname" is needed', 0);
+            $r[] = $this->Translate('Hostname must be specified');
+        }
+
+        $port = $this->ReadPropertyInteger('port');
+        if ($port == 0) {
+            $this->SendDebug(__FUNCTION__, '"port" is needed', 0);
+            $r[] = $this->Translate('Port must be specified');
+        }
+
+        $upsname = $this->ReadPropertyString('upsname');
+        if ($upsname == '') {
+            $this->SendDebug(__FUNCTION__, '"upsname" is needed', 0);
+            $r[] = $this->Translate('UPS-Identification must be specified');
+        }
+
+        return $r;
+    }
+
+    public function MessageSink($tstamp, $senderID, $message, $data)
+    {
+        parent::MessageSink($tstamp, $senderID, $message, $data);
+
+        if ($message == IPS_KERNELMESSAGE && $data[0] == KR_READY) {
             $this->SetUpdateInterval();
         }
     }
@@ -94,37 +76,28 @@ class NUTClient extends IPSModule
     {
         parent::ApplyChanges();
 
-        $module_disable = $this->ReadPropertyBoolean('module_disable');
-        if ($module_disable) {
-            $this->SetTimerInterval('UpdateData', 0);
-            $this->SetStatus(IS_INACTIVE);
+        $propertyNames = ['convert_script'];
+        $this->MaintainReferences($propertyNames);
+
+        if ($this->CheckPrerequisites() != false) {
+            $this->MaintainTimer('UpdateData', $msec);
+            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
             return;
         }
 
-        $hostname = $this->ReadPropertyString('hostname');
-        $port = $this->ReadPropertyInteger('port');
-
-        if ($hostname == '' || $port <= 0) {
-            $this->SetStatus(IS_INACTIVE);
+        if ($this->CheckUpdate() != false) {
+            $this->MaintainTimer('UpdateData', $msec);
+            $this->SetStatus(self::$IS_UPDATEUNCOMPLETED);
             return;
         }
 
-        $upsname = $this->ReadPropertyString('upsname');
-        $ups_list = $this->ExecuteList('UPS', '');
-        if ($ups_list == false) {
-            $this->SetStatus(self::$IS_NOSERVICE);
-            return false;
+        if ($this->CheckConfiguration() != false) {
+            $this->MaintainTimer('UpdateData', $msec);
+            $this->SetStatus(self::$IS_INVALIDCONFIG);
+            return;
         }
-        $ups_found = false;
-        foreach ($ups_list as $ups) {
-            if ($ups['id'] == $upsname) {
-                $ups_found = true;
-            }
-        }
-        if ($ups_found == false) {
-            $this->SetStatus(self::$IS_UPSIDUNKNOWN);
-            return false;
-        }
+
+        // MaintainVariable
 
         $vpos = 1;
         $varList = [];
@@ -200,30 +173,43 @@ class NUTClient extends IPSModule
             }
         }
 
-        $refs = $this->GetReferenceList();
-        foreach ($refs as $ref) {
-            $this->UnregisterReference($ref);
+        $module_disable = $this->ReadPropertyBoolean('module_disable');
+        if ($module_disable) {
+            $this->MaintainTimer('UpdateData', 0);
+            $this->SetStatus(IS_INACTIVE);
+            return;
         }
-        $propertyNames = ['convert_script'];
-        foreach ($propertyNames as $name) {
-            $oid = $this->ReadPropertyInteger($name);
-            if ($oid > 0) {
-                $this->RegisterReference($oid);
+
+        $upsname = $this->ReadPropertyString('upsname');
+        $ups_list = $this->ExecuteList('UPS', '');
+        if ($ups_list == false) {
+            $this->SetStatus(self::$IS_NOSERVICE);
+            return false;
+        }
+        $ups_found = false;
+        foreach ($ups_list as $ups) {
+            if ($ups['id'] == $upsname) {
+                $ups_found = true;
             }
         }
+        if ($ups_found == false) {
+            $this->MaintainTimer('UpdateData', 0);
+            $this->SetStatus(self::$IS_UPSIDUNKNOWN);
+            return false;
+        }
+
+        $this->SetStatus(IS_ACTIVE);
 
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->SetUpdateInterval();
         }
-
-        $this->SetStatus(IS_ACTIVE);
     }
 
     protected function SetUpdateInterval()
     {
         $sec = $this->ReadPropertyInteger('update_interval');
         $msec = $sec > 0 ? $sec * 1000 : 0;
-        $this->SetTimerInterval('UpdateData', $msec);
+        $this->MaintainTimer('UpdateData', $msec);
     }
 
     private function findVariables($objID, &$objList)
@@ -246,44 +232,13 @@ class NUTClient extends IPSModule
         }
     }
 
-    public function GetConfigurationForm()
-    {
-        $formElements = $this->GetFormElements();
-        $formActions = $this->GetFormActions();
-        $formStatus = $this->GetFormStatus();
-
-        $form = json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
-        if ($form == '') {
-            $this->SendDebug(__FUNCTION__, 'json_error=' . json_last_error_msg(), 0);
-            $this->SendDebug(__FUNCTION__, '=> formElements=' . print_r($formElements, true), 0);
-            $this->SendDebug(__FUNCTION__, '=> formActions=' . print_r($formActions, true), 0);
-            $this->SendDebug(__FUNCTION__, '=> formStatus=' . print_r($formStatus, true), 0);
-        }
-        return $form;
-    }
-
-    private function UpdateFields(object $use_fields)
-    {
-        $values = [];
-        $fieldMap = $this->getFieldMap();
-        foreach ($fieldMap as $map) {
-            $ident = $this->GetArrayElem($map, 'ident', '');
-            $desc = $this->GetArrayElem($map, 'desc', '');
-            $use = false;
-            foreach ($use_fields as $field) {
-                if ($ident == $this->GetArrayElem($field, 'ident', '')) {
-                    $use = (bool) $this->GetArrayElem($field, 'use', false);
-                    break;
-                }
-            }
-            $values[] = ['ident' => $ident, 'desc' => $this->Translate($desc), 'use' => $use];
-        }
-        $this->UpdateFormField('use_fields', 'values', json_encode($values));
-    }
-
     private function GetFormElements()
     {
-        $formElements = [];
+        $formElements = $this->GetCommonFormElements('NUT Client');
+
+        if ($this->GetStatus() == self::$IS_UPDATEUNCOMPLETED) {
+            return $formElements;
+        }
 
         $formElements[] = [
             'type'    => 'CheckBox',
@@ -291,65 +246,57 @@ class NUTClient extends IPSModule
             'caption' => 'Disable instance'
         ];
 
-        $items = [];
-        $items[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'hostname',
-            'caption' => 'Hostname'
-        ];
-        $items[] = [
-            'type'    => 'NumberSpinner',
-            'name'    => 'port',
-            'caption' => 'Port'
-        ];
-
-        $items[] = [
-            'type'    => 'Label',
-        ];
-        $items[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'upsname',
-            'caption' => 'UPS-Identification'
-        ];
-
-        $items[] = [
-            'type'    => 'Label',
-        ];
-        $items[] = [
-            'type'    => 'Label',
-            'caption' => 'Update data every X seconds'
-        ];
-        $items[] = [
-            'type'    => 'NumberSpinner',
-            'name'    => 'update_interval',
-            'caption' => 'Interval',
-            'suffix'  => 'Seconds'
-        ];
-
         $formElements[] = [
             'type'      => 'ExpansionPanel',
+            'items'     => [
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'hostname',
+                    'caption' => 'Hostname'
+                ],
+                [
+                    'type'    => 'NumberSpinner',
+                    'name'    => 'port',
+                    'caption' => 'Port'
+                ],
+                [
+                    'type'    => 'Label',
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'upsname',
+                    'caption' => 'UPS-Identification'
+                ],
+                [
+                    'type'    => 'Label',
+                ],
+                [
+                    'type'    => 'NumberSpinner',
+                    'name'    => 'update_interval',
+                    'minimum' => 0,
+                    'suffix'  => 'Seconds',
+                    'caption' => 'Update interval',
+                ],
+            ],
             'caption'   => 'Basic configuration',
-            'items'     => $items
         ];
 
-        $items = [];
-        $items[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'user',
-            'caption' => 'Username'
-        ];
-        $items[] = [
-            'type'    => 'PasswordTextBox',
-            'name'    => 'password',
-            'caption' => 'Password'
-        ];
         $formElements[] = [
             'type'    => 'ExpansionPanel',
+            'items'   => [
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'user',
+                    'caption' => 'Username'
+                ],
+                [
+                    'type'    => 'PasswordTextBox',
+                    'name'    => 'password',
+                    'caption' => 'Password'
+                ],
+            ],
             'caption' => 'Authentification (optional)',
-            'items'   => $items
         ];
-
-        $items = [];
 
         $values = [];
         $fieldMap = $this->getFieldMap();
@@ -367,186 +314,170 @@ class NUTClient extends IPSModule
             $values[] = ['ident' => $ident, 'desc' => $this->Translate($desc), 'use' => $use];
         }
 
-        $columns = [];
-        $columns[] = [
-            'caption' => 'Datapoint',
-            'name'    => 'ident',
-            'width'   => '200px',
-            'save'    => true
-        ];
-        $columns[] = [
-            'caption' => 'Description',
-            'name'    => 'desc',
-            'width'   => 'auto'
-        ];
-        $columns[] = [
-            'caption' => 'Use',
-            'name'    => 'use',
-            'width'   => '100px',
-            'edit'    => [
-                'type' => 'CheckBox'
-            ]
-        ];
-
-        $items[] = [
-            'type'     => 'List',
-            'name'     => 'use_fields',
-            'caption'  => 'Predefined datapoints',
-            'rowCount' => count($values),
-            'add'      => false,
-            'delete'   => false,
-            'columns'  => $columns,
-            'values'   => $values
-        ];
-
-        $columns = [];
-        $columns[] = [
-            'caption' => 'Datapoint',
-            'name'    => 'ident',
-            'add'     => '',
-            'width'   => 'auto',
-            'edit'    => [
-                'type' => 'ValidationTextBox'
-            ]
-        ];
-        $columns[] = [
-            'caption' => 'Variable type',
-            'name'    => 'vartype',
-            'add'     => VARIABLETYPE_STRING,
-            'width'   => '150px',
-            'edit'    => [
-                'type'    => 'Select',
-                'options' => [
-                    ['caption' => 'Boolean', 'value' => VARIABLETYPE_BOOLEAN],
-                    ['caption' => 'Integer', 'value' => VARIABLETYPE_INTEGER],
-                    ['caption' => 'Float', 'value' => VARIABLETYPE_FLOAT],
-                    ['caption' => 'String', 'value' => VARIABLETYPE_STRING],
-                ]
-            ]
-        ];
-
-        $items[] = [
-            'type'     => 'List',
-            'name'     => 'add_fields',
-            'caption'  => 'Additional datapoints',
-            'rowCount' => 10,
-            'add'      => true,
-            'delete'   => true,
-            'columns'  => $columns
-        ];
-        $items[] = [
-            'type'    => 'SelectScript',
-            'name'    => 'convert_script',
-            'caption' => 'convert values'
-        ];
-
         $formElements[] = [
             'type'    => 'ExpansionPanel',
-            'items'   => $items,
+            'items'   => [
+                [
+                    'type'     => 'List',
+                    'name'     => 'use_fields',
+                    'caption'  => 'Predefined datapoints',
+                    'rowCount' => count($values),
+                    'add'      => false,
+                    'delete'   => false,
+                    'columns'  => [
+                        [
+                            'caption' => 'Datapoint',
+                            'name'    => 'ident',
+                            'width'   => '200px',
+                            'save'    => true
+                        ],
+                        [
+                            'caption' => 'Description',
+                            'name'    => 'desc',
+                            'width'   => 'auto'
+                        ],
+                        [
+                            'caption' => 'Use',
+                            'name'    => 'use',
+                            'width'   => '100px',
+                            'edit'    => [
+                                'type' => 'CheckBox'
+                            ]
+                        ],
+                    ],
+                    'values'   => $values,
+                ],
+                [
+                    'type'     => 'List',
+                    'name'     => 'add_fields',
+                    'caption'  => 'Additional datapoints',
+                    'rowCount' => 10,
+                    'add'      => true,
+                    'delete'   => true,
+                    'columns'  => [
+                        [
+                            'caption' => 'Datapoint',
+                            'name'    => 'ident',
+                            'add'     => '',
+                            'width'   => 'auto',
+                            'edit'    => [
+                                'type' => 'ValidationTextBox'
+                            ]
+                        ],
+                        [
+                            'caption' => 'Variable type',
+                            'name'    => 'vartype',
+                            'add'     => VARIABLETYPE_STRING,
+                            'width'   => '150px',
+                            'edit'    => [
+                                'type'    => 'Select',
+                                'options' => [
+                                    [
+                                        'caption' => 'Boolean',
+                                        'value'   => VARIABLETYPE_BOOLEAN
+                                    ],
+                                    [
+                                        'caption' => 'Integer',
+                                        'value'   => VARIABLETYPE_INTEGER
+                                    ],
+                                    [
+                                        'caption' => 'Float',
+                                        'value'   => VARIABLETYPE_FLOAT
+                                    ],
+                                    [
+                                        'caption' => 'String',
+                                        'value'   => VARIABLETYPE_STRING
+                                    ],
+                                ]
+                            ]
+                        ],
+                    ],
+                ],
+                [
+                    'type'    => 'SelectScript',
+                    'name'    => 'convert_script',
+                    'caption' => 'convert values',
+                ],
+            ],
             'caption' => 'Variables',
-            // 'onClick' => 'NUTC_UpdateFields($id, $use_fields);'
         ];
 
         return $formElements;
-    }
-
-    public function ShowVars()
-    {
-        if ($this->GetStatus() == IS_INACTIVE) {
-            $this->SendDebug(__FUNCTION__, 'instance is inactive, skip', 0);
-            echo $this->translate('Instance is inactive') . PHP_EOL;
-            return;
-        }
-
-        $fieldMap = $this->getFieldMap();
-        $vars = $this->ExecuteList('VAR', '');
-
-        if ($vars != false) {
-            $txt = $this->translate('Predefined datapoints') . PHP_EOL;
-            foreach ($fieldMap as $map) {
-                $ident = $this->GetArrayElem($map, 'ident', '');
-                foreach ($vars as $var) {
-                    if ($ident == $var['varname']) {
-                        $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
-                        break;
-                    }
-                }
-            }
-            $txt .= PHP_EOL;
-
-            $txt .= $this->translate('Additional datapoints') . PHP_EOL;
-            foreach ($vars as $var) {
-                $predef = false;
-                foreach ($fieldMap as $map) {
-                    $ident = $this->GetArrayElem($map, 'ident', '');
-                    if ($ident == $var['varname']) {
-                        $predef = true;
-                        break;
-                    }
-                }
-                if ($predef) {
-                    continue;
-                }
-                $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
-            }
-        } else {
-            $txt = $this->translate('Got no datapoints') . PHP_EOL;
-        }
-
-        echo $txt;
     }
 
     private function GetFormActions()
     {
         $formActions = [];
 
-        $items = [];
-        $items[] = [
-            'type'    => 'Button',
-            'caption' => 'Test access',
-            'onClick' => 'NUTC_TestAccess($id);'
-        ];
-        $items[] = [
-            'type'    => 'Button',
-            'caption' => 'Show variables',
-            'onClick' => 'NUTC_ShowVars($id);'
-        ];
-        $items[] = [
-            'type'    => 'Button',
-            'label'   => 'Description of the variables',
-            'onClick' => 'echo \'https://networkupstools.org/docs/user-manual.chunked/apcs01.html#_examples\';'
-        ];
-        $items[] = [
-            'type'    => 'Label',
-        ];
-        $items[] = [
-            'type'    => 'Button',
-            'caption' => 'Update data',
-            'onClick' => 'NUTC_UpdateData($id);'
-        ];
+        if ($this->GetStatus() == self::$IS_UPDATEUNCOMPLETED) {
+            $formActions[] = $this->GetCompleteUpdateFormAction();
+
+            $formActions[] = $this->GetInformationFormAction();
+            $formActions[] = $this->GetReferencesFormAction();
+
+            return $formActions;
+        }
 
         $formActions[] = [
-            'type' => 'RowLayout',
-            'items'=> $items,
+            'type'  => 'RowLayout',
+            'items' => [
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Test access',
+                    'onClick' => $this->GetModulePrefix() . '_TestAccess($id);'
+                ],
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Show variables',
+                    'onClick' => $this->GetModulePrefix() . '_ShowVars($id);'
+                ],
+                [
+                    'type'    => 'Button',
+                    'label'   => 'Description of the variables',
+                    'onClick' => 'echo \'https://networkupstools.org/docs/user-manual.chunked/apcs01.html#_examples\';'
+                ],
+                [
+                    'type'    => 'Label',
+                ],
+                [
+                    'type'    => 'Button',
+                    'caption' => 'Update data',
+                    'onClick' => $this->GetModulePrefix() . '_UpdateData($id);'
+                ],
+            ],
         ];
+
+        $formActions[] = $this->GetInformationFormAction();
+        $formActions[] = $this->GetReferencesFormAction();
 
         return $formActions;
     }
 
+    public function RequestAction($ident, $value)
+    {
+        if ($this->CommonRequestAction($ident, $value)) {
+            return;
+        }
+        switch ($ident) {
+            default:
+                $this->SendDebug(__FUNCTION__, 'invalid ident ' . $ident, 0);
+                break;
+        }
+    }
+
     public function TestAccess()
     {
-        if ($this->GetStatus() == IS_INACTIVE) {
-            $this->SendDebug(__FUNCTION__, 'instance is inactive, skip', 0);
-            echo $this->translate('Instance is inactive') . PHP_EOL;
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
             return;
         }
 
         $line = $this->ExecuteVersion();
         if ($line == false) {
-            $txt = $this->translate('access failed') . PHP_EOL;
+            $txt = $this->Translate('access failed') . PHP_EOL;
             $txt .= PHP_EOL;
         } else {
-            $txt = $this->translate('access succeeded') . PHP_EOL;
+            $txt = $this->Translate('access succeeded') . PHP_EOL;
             $txt .= PHP_EOL;
             $txt .= $line . PHP_EOL;
             $txt .= PHP_EOL;
@@ -618,8 +549,58 @@ class NUTClient extends IPSModule
         echo $txt;
     }
 
+    public function ShowVars()
+    {
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
+            return;
+        }
+
+        $fieldMap = $this->getFieldMap();
+        $vars = $this->ExecuteList('VAR', '');
+
+        if ($vars != false) {
+            $txt = $this->Translate('Predefined datapoints') . PHP_EOL;
+            foreach ($fieldMap as $map) {
+                $ident = $this->GetArrayElem($map, 'ident', '');
+                foreach ($vars as $var) {
+                    if ($ident == $var['varname']) {
+                        $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
+                        break;
+                    }
+                }
+            }
+            $txt .= PHP_EOL;
+
+            $txt .= $this->Translate('Additional datapoints') . PHP_EOL;
+            foreach ($vars as $var) {
+                $predef = false;
+                foreach ($fieldMap as $map) {
+                    $ident = $this->GetArrayElem($map, 'ident', '');
+                    if ($ident == $var['varname']) {
+                        $predef = true;
+                        break;
+                    }
+                }
+                if ($predef) {
+                    continue;
+                }
+                $txt .= ' - ' . $var['varname'] . ' = "' . $var['val'] . '"' . PHP_EOL;
+            }
+        } else {
+            $txt = $this->Translate('Got no datapoints') . PHP_EOL;
+        }
+
+        echo $txt;
+    }
+
     public function UpdateData()
     {
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
+            return;
+        }
+
         $convert_script = $this->ReadPropertyInteger('convert_script');
 
         $vars = $this->ExecuteList('VAR', '');
@@ -672,7 +653,7 @@ class NUTClient extends IPSModule
                         continue;
                     }
 
-                    if ($convert_script > 0) {
+                    if ($convert_script >= 10000) {
                         $vartype = $this->GetArrayElem($field, 'vartype', -1);
                         $info = [
                             'InstanceID'    => $this->InstanceID,
