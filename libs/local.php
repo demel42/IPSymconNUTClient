@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 trait NUTClientLocalLib
 {
-    public static $IS_NOSERVICE = IS_EBASE + 1;
-    public static $IS_UPSIDMISSING = IS_EBASE + 2;
-    public static $IS_UPSIDUNKNOWN = IS_EBASE + 3;
+    public static $IS_NOSERVICE = IS_EBASE + 10;
+    public static $IS_UPSIDMISSING = IS_EBASE + 11;
+    public static $IS_UPSIDUNKNOWN = IS_EBASE + 12;
 
     private function GetFormStatus()
     {
