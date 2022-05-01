@@ -177,8 +177,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.5.1 @ 29.04.2022 10:23
+- 1.5.1 @ 01.05.2022 17:31
   - Fix zu 1.5 (Error-Codes doppelt verwendet)
+  - TestAccess() setzt ggfs. Status wieder auf "aktiv"
 
 - 1.5 @ 26.04.2022 16:34
   - Anpassungen an IPS 6.2 (Prüfung auf ungültige ID's)

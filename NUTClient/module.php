@@ -467,8 +467,9 @@ class NUTClient extends IPSModule
 
     public function TestAccess()
     {
-        if ($this->CheckStatus() == self::$STATUS_INVALID) {
-            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
+        if ($this->GetStatus() == IS_INACTIVE) {
+            $this->SendDebug(__FUNCTION__, 'instance is inactive, skip', 0);
+            echo $this->GetStatusText() . PHP_EOL;
             return;
         }
 
@@ -544,6 +545,7 @@ class NUTClient extends IPSModule
                     $txt .= ' - ' . $ident . PHP_EOL;
                 }
             }
+            $this->SetStatus(IS_ACTIVE);
         }
 
         echo $txt;
