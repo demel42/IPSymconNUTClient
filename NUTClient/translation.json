@@ -1,7 +1,7 @@
 {
 	"translations": {
 		"de": {
-			"NUT Client": "NUT Client",
+			"NUT Client (Network UPS Tools)": "NUT Client (Netzwerk-USV-Tools)",
 
 			"__function__": "CheckConfiguration",
 			"Hostname must be specified": "Hostname muss angegeben werden",

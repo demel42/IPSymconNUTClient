@@ -243,7 +243,7 @@ class NUTClient extends IPSModule
 
     private function GetFormElements()
     {
-        $formElements = $this->GetCommonFormElements('NUT Client');
+        $formElements = $this->GetCommonFormElements('NUT Client (Network UPS Tools)');
 
         if ($this->GetStatus() == self::$IS_UPDATEUNCOMPLETED) {
             return $formElements;
@@ -329,7 +329,6 @@ class NUTClient extends IPSModule
                 [
                     'type'     => 'List',
                     'name'     => 'use_fields',
-                    'caption'  => 'Predefined datapoints',
                     'rowCount' => count($values),
                     'add'      => false,
                     'delete'   => false,
@@ -355,11 +354,11 @@ class NUTClient extends IPSModule
                         ],
                     ],
                     'values'   => $values,
+                    'caption'  => 'Predefined datapoints',
                 ],
                 [
                     'type'     => 'List',
                     'name'     => 'add_fields',
-                    'caption'  => 'Additional datapoints',
                     'rowCount' => 10,
                     'add'      => true,
                     'delete'   => true,
@@ -401,6 +400,7 @@ class NUTClient extends IPSModule
                             ]
                         ],
                     ],
+                    'caption'  => 'Additional datapoints',
                 ],
                 [
                     'type'    => 'SelectScript',
@@ -444,9 +444,6 @@ class NUTClient extends IPSModule
                     'type'    => 'Button',
                     'label'   => 'Description of the variables',
                     'onClick' => 'echo \'https://networkupstools.org/docs/user-manual.chunked/apcs01.html#_examples\';'
-                ],
-                [
-                    'type'    => 'Label',
                 ],
                 [
                     'type'    => 'Button',
