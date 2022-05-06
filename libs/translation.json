@@ -1,0 +1,28 @@
+{
+	"translations": {
+		"de": {
+			"__variableprofile__": "NUTC.Status",
+			"on line": "Netzbetrieb",
+			"on battery": "Batteriebetrieb",
+			"low battery": "niedriger Batterieladung",
+			"high battery": "hohe Batterieladung",
+			"battery needs replacement": "Batterie muss ersetzt werden",
+			"battery is charging": "Batterie lädt",
+			"battery is discharging": "Batterie entlädt",
+			"bypass circuit activated": "Bypass aktiviert",
+			"is calibrating": "wird kalibriert",
+			"offline": "ausgeschaltet",
+			"overloaded": "überlastetet",
+			"trimming incoming voltage": "Eingangsspannung wird begrenzt",
+			"boosting incoming voltage": "Eingangsspannung wird erhöhen",
+			"forced shutdown": "erzwungenes Herunterfahren",
+			"unknown state": "unbekannter Zustand",
+
+			"__status__": "",
+			"Instance is inactive (no service)": "Instanz ist inaktiv (Service nicht verfügbar)",
+			"Instance is inactive (ups-id unknown)": "Instanz ist inaktiv (USV-ID ist unbekannt)",
+
+			"__end__": ""
+		}
+	}
+}

@@ -1,0 +1,82 @@
+{
+	"translations": {
+		"de": {
+			"NUT Client": "NUT Client",
+
+			"__function__": "CheckConfiguration",
+			"Hostname must be specified": "Hostname muss angegeben werden",
+			"Port must be specified": "Port muss angegeben werden",
+			"UPS-Identification must be specified": "USV-Identification muss angegeben werden",
+
+			"__elements__": "",
+			"Disable instance": "Instanz deaktivieren",
+
+			"Basic configuration": "Basis-Konfiguration",
+			"Hostname": "Hostname",
+			"Port": "Port",
+			"UPS-Identification": "USV-Identifikation",
+
+			"Authentification (optional)": "Anmeldedaten (optional)",
+			"Username": "Benutzer",
+			"Password": "Passwort",
+
+			"Variables": "Variablen",
+			"Predefined datapoints": "vordefinierte Datenpunkte",
+			"Datapoint": "Datenpunkt",
+			"Description": "Beschreibung",
+			"Use": "verwenden",
+			"Additional datapoints": "zusätzliche Datenpunkte",
+			"Variable type": "Variablentyp",
+			"convert values": "Werte konvertieren",
+
+			"Seconds": "Sekunden",
+			"Update interval": "Aktualisierungsintervall",
+
+			"__variables__": "",
+			"Status": "Status",
+			"Additional status": "Statuszusatz",
+			"Alarm": "Alarm",
+			"Manufacturer": "Hersteller",
+			"Model": "Modell",
+			"Serialnumber": "Seriennummer",
+			"Load": "Auslastung",
+			"Nominal value of real power": "Nennwert der Wirkleistung",
+			"Battery charge": "Batterieladung",
+			"Battery voltage": "Batteriespannung",
+			"Battery current": "Batteriestrom",
+			"Battery capacity": "Batteriekapazität",
+			"Battery temperature": "Batterietemperatur",
+			"Battery runtime": "Akkulaufzeit",
+			"Input voltage": "Eingangsspannung",
+			"Input current": "Eingangsstrom",
+			"Input real power": "Eingangswirkleistung",
+			"Input frequency": "Eingangsfrequenz",
+			"Output voltage": "Ausgangsspannung",
+			"Output current": "Ausgangsstrom",
+			"Output frequency": "Ausgangsfrequenz",
+			"Last update": "letzte Aktualisierung",
+
+			"__variable__": "DP_ups_status_info",
+			"NUT-service not reachable": "NUT-Dienst ist nicht erreichbar",
+			"unable to connect NUT-server": "keine Verbindung zum NUT-Server",
+
+			"__actions__": "",
+			"Show variables": "Anzeige der Variablen",
+			"Description of the variables": "Beschreibung der Variablen",
+			"Test access": "Zugang prüfen",
+			"Update data": "Aktualisiere Daten",
+
+			"__function__": "TestAccess",
+			"access failed": "Zugang fehlgeschlagen",
+			"access succeeded": "Zugang erfolgreich",
+			"UPS found": "USV gefunden",
+			"Warning: the specified UPS ID is unknown": "Achtung: die angegebenen USV-ID ist unbekannt",
+			"datapoints not found in data": "nicht in den Daten enthaltenen Datenpunkte",
+
+			"__function__": "ShowVars",
+			"Got no datapoints": "keine Datenpunkte empfangen",
+
+			"__end__": ""
+		}
+	}
+}

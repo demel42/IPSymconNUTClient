@@ -177,6 +177,12 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.5.2 @ 06.05.2022 11:39
+  - IPS-Version ist nun minimal 6.0
+  - Überlagerung von Translate und Aufteilung von locale.json in 3 translation.json (Modul, libs und CommonStubs)
+  - diverse interne Änderungen
+  - auto. re-aktivieren, wenn die Verbinung vom NUT-Server verloren ging (IS_NOSERVICE ist nun STATUS_RETRYABLE)
+
 - 1.5.1 @ 01.05.2022 17:31
   - Fix zu 1.5 (Error-Codes doppelt verwendet)
   - TestAccess() setzt ggfs. Status wieder auf "aktiv"

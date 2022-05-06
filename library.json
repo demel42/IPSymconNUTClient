@@ -1,12 +1,12 @@
 {
-    "id": "{6C3F5B14-D005-EDF2-1877-0268635FDB26}",
-    "author": "Ch. Damsky",
-    "name": "NUTClient",
-    "url": "https://github.com/demel42/IPSymconNUTClient",
-    "compatibility": {
-        "version": "6.0"
-    },
-    "version": "1.5.1",
-    "build": 0,
-    "date": 1651419079
+	"id": "{6C3F5B14-D005-EDF2-1877-0268635FDB26}",
+	"author": "Ch. Damsky",
+	"name": "NUTClient",
+	"url": "https://github.com/demel42/IPSymconNUTClient",
+	"compatibility": {
+		"version": "6.0"
+	},
+	"version": "1.5.2",
+	"build": 0,
+	"date": 1651829995
 }

@@ -1,15 +1,15 @@
 {
-    "id": "{D7648DB1-3D1D-F0A8-BA2D-01EA50AF6F4C}",
-    "name": "NUT Client",
-    "type": 3,
-    "vendor": "",
-    "aliases": [
-        "Network UPS Tools",
+	"id": "{D7648DB1-3D1D-F0A8-BA2D-01EA50AF6F4C}",
+	"name": "NUT Client",
+	"type": 3,
+	"vendor": "",
+	"aliases": [
+		"Network UPS Tools",
 		"NUT-Client"
-    ],
-    "parentRequirements": [],
-    "childRequirements": [],
-    "implemented": [],
-    "prefix": "NUTC",
-    "url": "https://github.com/demel42/IPSymconNUTClient/blob/master/README.md"
+	],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "NUTC",
+	"url": "https://github.com/demel42/IPSymconNUTClient/blob/master/README.md"
 }

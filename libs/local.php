@@ -5,15 +5,13 @@ declare(strict_types=1);
 trait NUTClientLocalLib
 {
     public static $IS_NOSERVICE = IS_EBASE + 10;
-    public static $IS_UPSIDMISSING = IS_EBASE + 11;
-    public static $IS_UPSIDUNKNOWN = IS_EBASE + 12;
+    public static $IS_UPSIDUNKNOWN = IS_EBASE + 11;
 
     private function GetFormStatus()
     {
         $formStatus = $this->GetCommonFormStatus();
 
         $formStatus[] = ['code' => self::$IS_NOSERVICE, 'icon' => 'error', 'caption' => 'Instance is inactive (no service)'];
-        $formStatus[] = ['code' => self::$IS_UPSIDMISSING, 'icon' => 'error', 'caption' => 'Instance is inactive (ups-id missing)'];
         $formStatus[] = ['code' => self::$IS_UPSIDUNKNOWN, 'icon' => 'error', 'caption' => 'Instance is inactive (ups-id unknown)'];
 
         return $formStatus;
@@ -28,6 +26,9 @@ trait NUTClientLocalLib
         switch ($this->GetStatus()) {
             case IS_ACTIVE:
                 $class = self::$STATUS_VALID;
+                break;
+            case self::$IS_NOSERVICE:
+                $class = self::$STATUS_RETRYABLE;
                 break;
             default:
                 $class = self::$STATUS_INVALID;
