@@ -661,7 +661,7 @@ class NUTClient extends IPSModule
                         continue;
                     }
 
-                    if ($convert_script >= 10000) {
+                    if (IPS_ScriptExists($convert_script)) {
                         $vartype = $this->GetArrayElem($field, 'vartype', -1);
                         $info = [
                             'InstanceID'    => $this->InstanceID,
