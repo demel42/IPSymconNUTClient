@@ -42,7 +42,9 @@ class NUTClient extends IPSModule
 
         $this->RegisterAttributeString('UpdateInfo', '');
 
-        $this->RegisterTimer('UpdateData', 0, $this->GetModulePrefix() . '_UpdateData(' . $this->InstanceID . ');');
+        $this->InstallVarProfiles(false);
+
+        $this->RegisterTimer('UpdateData', 0, 'IPS_RequestAction(' . $this->InstanceID . ', "UpdateData", "");');
 
         $this->RegisterMessage(0, IPS_KERNELMESSAGE);
     }
@@ -214,7 +216,7 @@ class NUTClient extends IPSModule
         }
     }
 
-    protected function SetUpdateInterval()
+    private function SetUpdateInterval()
     {
         $sec = $this->ReadPropertyInteger('update_interval');
         $msec = $sec > 0 ? $sec * 1000 : 0;
@@ -433,12 +435,12 @@ class NUTClient extends IPSModule
                 [
                     'type'    => 'Button',
                     'caption' => 'Test access',
-                    'onClick' => $this->GetModulePrefix() . '_TestAccess($id);'
+                    'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "TestAccess", "");',
                 ],
                 [
                     'type'    => 'Button',
                     'caption' => 'Show variables',
-                    'onClick' => $this->GetModulePrefix() . '_ShowVars($id);'
+                    'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "ShowVars", "");',
                 ],
                 [
                     'type'    => 'Button',
@@ -448,7 +450,27 @@ class NUTClient extends IPSModule
                 [
                     'type'    => 'Button',
                     'caption' => 'Update data',
-                    'onClick' => $this->GetModulePrefix() . '_UpdateData($id);'
+                    'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "UpdateData", "");',
+                ],
+            ],
+        ];
+
+        $formActions[] = [
+            'type'      => 'ExpansionPanel',
+            'caption'   => 'Expert area',
+            'expanded'  => false,
+            'items'     => [
+                $this->GetInstallVarProfilesFormItem(),
+            ]
+        ];
+
+        $formActions[] = [
+            'type'      => 'ExpansionPanel',
+            'caption'   => 'Test area',
+            'expanded ' => false,
+            'items'     => [
+                [
+                    'type'    => 'TestCenter',
                 ],
             ],
         ];
@@ -464,18 +486,29 @@ class NUTClient extends IPSModule
         if ($this->CommonRequestAction($ident, $value)) {
             return;
         }
+
         switch ($ident) {
+            case 'TestAccess':
+                $this->TestAccess();
+                break;
+            case 'ShowVars':
+                $this->ShowVars();
+                break;
+            case 'UpdateData':
+                $this->UpdateData();
+                break;
             default:
                 $this->SendDebug(__FUNCTION__, 'invalid ident ' . $ident, 0);
                 break;
         }
     }
 
-    public function TestAccess()
+    private function TestAccess()
     {
         if ($this->GetStatus() == IS_INACTIVE) {
             $this->SendDebug(__FUNCTION__, 'instance is inactive, skip', 0);
-            echo $this->GetStatusText() . PHP_EOL;
+            $s = $this->GetStatusText() . PHP_EOL;
+            $this->PopupMessage($s);
             return;
         }
 
@@ -554,10 +587,10 @@ class NUTClient extends IPSModule
             $this->SetStatus(IS_ACTIVE);
         }
 
-        echo $txt;
+        $this->PopupMessage($txt);
     }
 
-    public function ShowVars()
+    private function ShowVars()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
             $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
@@ -599,10 +632,10 @@ class NUTClient extends IPSModule
             $txt = $this->Translate('Got no datapoints') . PHP_EOL;
         }
 
-        echo $txt;
+        $this->PopupMessage($txt);
     }
 
-    public function UpdateData()
+    private function UpdateData()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
             $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);

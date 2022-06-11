@@ -54,7 +54,7 @@ trait NUTClientLocalLib
     public static $NUTC_STATUS_FSD = 13;
     public static $NUTC_STATUS_UNKNOWN = 14;
 
-    public function InstallVarProfiles(bool $reInstall = false)
+    private function InstallVarProfiles(bool $reInstall = false)
     {
         if ($reInstall) {
             $this->SendDebug(__FUNCTION__, 'reInstall=' . $this->bool2str($reInstall), 0);
