@@ -464,17 +464,6 @@ class NUTClient extends IPSModule
             ]
         ];
 
-        $formActions[] = [
-            'type'      => 'ExpansionPanel',
-            'caption'   => 'Test area',
-            'expanded ' => false,
-            'items'     => [
-                [
-                    'type'    => 'TestCenter',
-                ],
-            ],
-        ];
-
         $formActions[] = $this->GetInformationFormAction();
         $formActions[] = $this->GetReferencesFormAction();
 
