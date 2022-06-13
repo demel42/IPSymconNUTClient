@@ -937,7 +937,8 @@ class NUTClient extends IPSModule
             $this->SendDebug(__FUNCTION__, 'got no lines', 0);
             return false;
         }
-        $this->SendDebug(__FUNCTION__, 'received ' . count($lines) . ' lines', 0);
+        $this->SendDebug(__FUNCTION__, 'received ' . count($lines) . ' lines => ' . print_r($lines, true), 0);
+
         return $lines;
     }
 
@@ -1260,7 +1261,7 @@ class NUTClient extends IPSModule
             [
                 'tag'   => 'CAL',
                 'code'  => self::$NUTC_STATUS_CAL,
-                'info'  => $this->Translate('calibrating')
+                'info'  => $this->Translate('is calibrating')
             ],
             [
                 'tag'   => 'TRIM',
