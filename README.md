@@ -177,6 +177,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.6.1 @ 13.06.2022 13:47
+  - Fix: undefinierte Variable 'msec'
+    nur bei unvollständiger Konfiguration (fehlgeschlagenem 'CheckConfiguration')
+
 - 1.6 @ 11.06.2022 18:33
   - Fix: Variablenprofile wurden nicht mehr angelegt
   - update submodule CommonStubs
