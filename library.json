@@ -4,9 +4,9 @@
 	"name": "NUTClient",
 	"url": "https://github.com/demel42/IPSymconNUTClient",
 	"compatibility": {
-		"version": "6.0"
+		"version": "6.2"
 	},
 	"version": "1.6.1",
 	"build": 0,
-	"date": 1655122095
+	"date": 1655284446
 }

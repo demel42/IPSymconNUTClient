@@ -177,10 +177,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.6.1 @ 13.06.2022 14:08
+- 1.6.1 @ 15.06.2022 11:14
   - Fix: undefinierte Variable 'msec'
     nur bei unvollständiger Konfiguration (fehlgeschlagenem 'CheckConfiguration')
   - Fix: fehlende Übersetzung (Status "CAL")
+  - Fix: Angabe der Kompatibilität auf 6.2 korrigiert
 
 - 1.6 @ 11.06.2022 18:33
   - Fix: Variablenprofile wurden nicht mehr angelegt
