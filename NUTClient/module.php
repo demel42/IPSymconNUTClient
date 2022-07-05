@@ -92,19 +92,19 @@ class NUTClient extends IPSModule
 
         if ($this->CheckPrerequisites() != false) {
             $this->MaintainTimer('UpdateData', 0);
-            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
+            $this->MaintainStatus(self::$IS_INVALIDPREREQUISITES);
             return;
         }
 
         if ($this->CheckUpdate() != false) {
             $this->MaintainTimer('UpdateData', 0);
-            $this->SetStatus(self::$IS_UPDATEUNCOMPLETED);
+            $this->MaintainStatus(self::$IS_UPDATEUNCOMPLETED);
             return;
         }
 
         if ($this->CheckConfiguration() != false) {
             $this->MaintainTimer('UpdateData', 0);
-            $this->SetStatus(self::$IS_INVALIDCONFIG);
+            $this->MaintainStatus(self::$IS_INVALIDCONFIG);
             return;
         }
 
@@ -187,14 +187,14 @@ class NUTClient extends IPSModule
         $module_disable = $this->ReadPropertyBoolean('module_disable');
         if ($module_disable) {
             $this->MaintainTimer('UpdateData', 0);
-            $this->SetStatus(IS_INACTIVE);
+            $this->MaintainStatus(IS_INACTIVE);
             return;
         }
 
         $upsname = $this->ReadPropertyString('upsname');
         $ups_list = $this->ExecuteList('UPS', '');
         if ($ups_list == false) {
-            $this->SetStatus(self::$IS_NOSERVICE);
+            $this->MaintainStatus(self::$IS_NOSERVICE);
             return false;
         }
         $ups_found = false;
@@ -205,11 +205,11 @@ class NUTClient extends IPSModule
         }
         if ($ups_found == false) {
             $this->MaintainTimer('UpdateData', 0);
-            $this->SetStatus(self::$IS_UPSIDUNKNOWN);
+            $this->MaintainStatus(self::$IS_UPSIDUNKNOWN);
             return false;
         }
 
-        $this->SetStatus(IS_ACTIVE);
+        $this->MaintainStatus(IS_ACTIVE);
 
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->SetUpdateInterval();
@@ -527,7 +527,7 @@ class NUTClient extends IPSModule
             }
             if ($ups_found == false) {
                 $txt .= PHP_EOL . $this->Translate('Warning: the specified UPS ID is unknown') . PHP_EOL;
-                $this->SetStatus(self::$IS_UPSIDUNKNOWN);
+                $this->MaintainStatus(self::$IS_UPSIDUNKNOWN);
             }
 
             $b = false;
@@ -573,7 +573,7 @@ class NUTClient extends IPSModule
                     $txt .= ' - ' . $ident . PHP_EOL;
                 }
             }
-            $this->SetStatus(IS_ACTIVE);
+            $this->MaintainStatus(IS_ACTIVE);
         }
 
         $this->PopupMessage($txt);
@@ -638,7 +638,7 @@ class NUTClient extends IPSModule
         if ($vars == false) {
             $this->SetValue('DP_ups_status', self::$NUTC_STATUS_OFF);
             $this->SetValue('DP_ups_status_info', $this->Translate('NUT-service not reachable'));
-            $this->SetStatus(self::$IS_NOSERVICE);
+            $this->MaintainStatus(self::$IS_NOSERVICE);
             return;
         }
 
@@ -803,7 +803,7 @@ class NUTClient extends IPSModule
 
         $info = $model . ' (#' . $serial . ')';
         $this->SetSummary($info);
-        $this->SetStatus(IS_ACTIVE);
+        $this->MaintainStatus(IS_ACTIVE);
     }
 
     private function doCommunication($fp, $cmd, $args, &$lines)

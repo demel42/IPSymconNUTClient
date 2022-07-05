@@ -101,28 +101,28 @@ Hier muss ggfs der Zugriff vom IPS erlaubt werden, am Beispiel der Diskstation:
 
 Mit Hilfe der Kommandos können die NUT-Funktionalitäten direkt genutzt werden, die Beschreibung der Kommandos siehe [hier](https://networkupstools.org/docs/developer-guide.chunked/ar01s09.html).
 
-`NUTC_function ExecuteList(int $InstanzID, string $subcmd, string $varname);`
+`NUTC_ExecuteList(int $InstanzID, string $subcmd, string $varname);`
 führt alle Unterkommandos von Typ _LIST_ aus.
 
-`NUTC_function ExecuteGet(int $InstanzID, string $subcmd, string $varname);`
+`NUTC_ExecuteGet(int $InstanzID, string $subcmd, string $varname);`
 führt alle Unterkommandos von Typ _GET_ aus.
 
-`NUTC_function ExecuteSet(int $InstanzID, string $varname, string $value);`
+`NUTC_ExecuteSet(int $InstanzID, string $varname, string $value);`
 führt alle Unterkommandos von Typ _GET_ aus.
 
-`NUTC_function ExecuteCmd(int $InstanzID, string $cmdname);`
+`NUTC_ExecuteCmd(int $InstanzID, string $cmdname);`
 führt alle Unterkommandos von Typ _INSTCMD_ aus.
 
-`NUTC_function ExecuteHelp(int $InstanzID);`
+`NUTC_ExecuteHelp(int $InstanzID);`
 führt alle Unterkommandos von Typ _HELP_ aus.
 
-`NUTC_function ExecuteVersion(int $InstanzID);`
+`NUTC_ExecuteVersion(int $InstanzID);`
 führt alle Unterkommandos von Typ _VER_ aus.
 
-`NUTC_function ExecuteLogin(int $InstanzID);`
+`NUTC_ExecuteLogin(int $InstanzID);`
 führt alle Unterkommandos von Typ _LOGIN_ aus.
 
-`NUTC_function ExecuteLogout(int $InstanzID);`
+`NUTC_ExecuteLogout(int $InstanzID);`
 führt alle Unterkommandos von Typ _LOGOUT_ aus.
 
 Die Nutzung der FUnktionen hängt aber von dem NUT-Server ab und setzt auch Kenntniss der [NUT-Dokumentation](https://networkupstools.org/) voraus!
@@ -176,6 +176,10 @@ GUIDs
   - NUTClient: `{D7648DB1-3D1D-F0A8-BA2D-01EA50AF6F4C}`
 
 ## 7. Versions-Historie
+
+- 1.7 @ 05.07.2022 15:30
+  - Verbesserung: IPS-Status wird nur noch gesetzt, wenn er sich ändert
+  - README.md korrigiert
 
 - 1.6.1 @ 15.06.2022 11:14
   - Fix: undefinierte Variable 'msec'
