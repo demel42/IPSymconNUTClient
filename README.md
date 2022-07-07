@@ -177,7 +177,7 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.7 @ 05.07.2022 15:30
+- 1.7 @ 07.07.2022 10:04
   - Verbesserung: IPS-Status wird nur noch gesetzt, wenn er sich ändert
   - README.md korrigiert
 
