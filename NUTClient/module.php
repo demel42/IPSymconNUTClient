@@ -513,7 +513,7 @@ class NUTClient extends IPSModule
 
             $upsname = $this->ReadPropertyString('upsname');
             $ups_list = $this->ExecuteList('UPS', '');
-            $n_ups = count($ups_list);
+            $n_ups = is_array($ups_list) ? count($ups_list) : 0;
             $ups_found = false;
             if ($n_ups > 0) {
                 $txt .= $n_ups . ' ' . $this->Translate('UPS found') . PHP_EOL;
@@ -532,45 +532,47 @@ class NUTClient extends IPSModule
 
             $b = false;
             $vars = $this->ExecuteList('VAR', '');
-            $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
-            foreach ($use_fields as $field) {
-                $use = (bool) $this->GetArrayElem($field, 'use', false);
-                if (!$use) {
-                    continue;
-                }
-                $ident = $this->GetArrayElem($field, 'ident', '');
-                $found = false;
-                foreach ($vars as $var) {
-                    if ($ident == $var['varname']) {
-                        $found = true;
-                        break;
+            if (is_array($vars)) {
+                $use_fields = json_decode($this->ReadPropertyString('use_fields'), true);
+                foreach ($use_fields as $field) {
+                    $use = (bool) $this->GetArrayElem($field, 'use', false);
+                    if (!$use) {
+                        continue;
+                    }
+                    $ident = $this->GetArrayElem($field, 'ident', '');
+                    $found = false;
+                    foreach ($vars as $var) {
+                        if ($ident == $var['varname']) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if ($found == false) {
+                        if ($b == false) {
+                            $txt .= PHP_EOL . $this->Translate('datapoints not found in data') . PHP_EOL;
+                            $b = true;
+                        }
+                        $txt .= ' - ' . $ident . PHP_EOL;
                     }
                 }
-                if ($found == false) {
-                    if ($b == false) {
-                        $txt .= PHP_EOL . $this->Translate('datapoints not found in data') . PHP_EOL;
-                        $b = true;
-                    }
-                    $txt .= ' - ' . $ident . PHP_EOL;
-                }
-            }
 
-            $add_fields = json_decode($this->ReadPropertyString('add_fields'), true);
-            foreach ($add_fields as $field) {
-                $ident = $field['ident'];
-                $found = false;
-                foreach ($vars as $var) {
-                    if ($ident == $var['varname']) {
-                        $found = true;
-                        break;
+                $add_fields = json_decode($this->ReadPropertyString('add_fields'), true);
+                foreach ($add_fields as $field) {
+                    $ident = $field['ident'];
+                    $found = false;
+                    foreach ($vars as $var) {
+                        if ($ident == $var['varname']) {
+                            $found = true;
+                            break;
+                        }
                     }
-                }
-                if ($found == false) {
-                    if ($b == false) {
-                        $txt .= PHP_EOL . $this->Translate('datapoints not found in data') . PHP_EOL;
-                        $b = true;
+                    if ($found == false) {
+                        if ($b == false) {
+                            $txt .= PHP_EOL . $this->Translate('datapoints not found in data') . PHP_EOL;
+                            $b = true;
+                        }
+                        $txt .= ' - ' . $ident . PHP_EOL;
                     }
-                    $txt .= ' - ' . $ident . PHP_EOL;
                 }
             }
             $this->MaintainStatus(IS_ACTIVE);
@@ -990,7 +992,7 @@ class NUTClient extends IPSModule
         }
 
         $lines = $this->performQuery('LIST', $query);
-        if ($lines == '') {
+        if ($lines == false) {
             return false;
         }
         $arr = [];
