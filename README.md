@@ -177,6 +177,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.9 @ 20.09.2023 17:42
+  - Neu: Ermittlung von Speicherbedarf und Laufzeit (aktuell und für 31 Tage) und Anzeige im Panel "Information"
+  - update submodule CommonStubs
+
 - 1.8 @ 30.06.2023 09:28
   - Fix: bessere Absicherung ggü. fehlenden Daten
   - Vorbereitung auf IPS 7 / PHP 8.2
