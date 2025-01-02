@@ -177,6 +177,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.11 @ 02.01.2025 14:28
+  - interne Änderung
+  - update submodule CommonStubs
+
 - 1.10 @ 06.02.2024 09:46
   - Verbesserung: Angleichung interner Bibliotheken anlässlich IPS 7
   - update submodule CommonStubs
