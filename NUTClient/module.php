@@ -841,26 +841,26 @@ class NUTClient extends IPSModule
             $line = str_replace("\n", '', $line);
 
             switch ($cmd) {
-            case 'LIST':
-                $lines[] = $line;
-                if (preg_match('/^END LIST/', $line)) {
+                case 'LIST':
+                    $lines[] = $line;
+                    if (preg_match('/^END LIST/', $line)) {
+                        $finished = true;
+                    }
+                    break;
+                case 'GET':
+                case 'SET':
+                case 'INSTCMD':
+                case 'LOGIN':
+                case 'LOGOUT':
+                case 'USERNAME':
+                case 'PASSWORD':
+                case 'HELP':
+                case 'VER':
+                    $lines[] = $line;
                     $finished = true;
-                }
-                break;
-            case 'GET':
-            case 'SET':
-            case 'INSTCMD':
-            case 'LOGIN':
-            case 'LOGOUT':
-            case 'USERNAME':
-            case 'PASSWORD':
-            case 'HELP':
-            case 'VER':
-                $lines[] = $line;
-                $finished = true;
-                break;
-            default:
-                $lines[] = $line;
+                    break;
+                default:
+                    $lines[] = $line;
             }
             if ($finished) {
                 break;
